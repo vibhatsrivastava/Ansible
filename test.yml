@@ -1,12 +1,17 @@
 ---
 - name: Ping Test
   hosts: all
-  gather_facts: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3.6
   tasks:
+    - name: Show OS Family
+      debug:
+        var: ansible_os_family
+
     - name: Linux
-      ping:
-      when: ansible_facts['os_type'] != "windows"
+      ansible.builtin.ping:
+      when: ansible_os_family != "Windows"
 
     - name: Windows
-      win_ping:
-      when: ansible_facts['os_type'] == "windows"
+      ansible.windows.win_ping:
+      when: ansible_os_family == "Windows"
