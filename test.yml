@@ -1,0 +1,12 @@
+---
+- name: Ping Test
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Linux
+      ping:
+      when: ansible_facts['os_type'] != "windows"
+
+    - name: Windows
+      win_ping:
+      when: ansible_facts['os_type'] == "windows"
