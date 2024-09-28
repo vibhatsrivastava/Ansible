@@ -1,0 +1,7 @@
+---
+- name: Playbook to test roles
+  hosts: all
+  tasks:
+    - name: Role to test
+      ansible.builtin.include_role:
+        name: <name_of_the_role_to_be_tested>
