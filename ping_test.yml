@@ -1,8 +1,6 @@
 ---
 - name: Ping Test
   hosts: all
-  vars:
-    ansible_python_interpreter: /usr/bin/python3.6
   tasks:
     - name: Show OS Family
       debug:
