@@ -30,7 +30,7 @@
 
     - name: Get all job templates
       ansible.builtin.uri:
-        url: "{{ tower_host }}/api/v2/job_templates
+        url: "{{ tower_host }}/api/v2/job_templates"
         body_format: json
         force_basic_auth: false
         headers:
