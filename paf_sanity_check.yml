@@ -42,4 +42,5 @@
 
     - name: Display project info
       ansible.builtin.debug:
-        var: all_jt_info.json.results[0].name
+        var: item.name
+      loop: "{{ all_jt_info.json.results }}"
