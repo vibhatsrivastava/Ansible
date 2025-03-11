@@ -24,7 +24,7 @@
         validate_certs: false
       register: project_info
 
-    - name: Display project info
+    - name: Set project facts
       ansible.builtin.set_fact:
         project_id_fact: "{{ project_info.json.results[0].id }}"
 
@@ -40,9 +40,13 @@
         validate_certs: false
       register: all_jt_info
 
-    - name: Display project info
+    - name: Set JT facts
       ansible.builtin.set_fact:
         jt_config_array: "{{ jt_config_array | default([]) + item.name }}"
       when:
         - item.project == project_id_fact
       loop: "{{ all_jt_info.json.results }}"
+
+    - name: Display JT fact
+      ansible.builtin.debug:
+        var: jt_config_array
