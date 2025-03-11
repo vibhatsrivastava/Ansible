@@ -44,7 +44,7 @@
       ansible.builtin.set_fact:
         jt_config_array: "{{ jt_config_array | default([]) + item.name }}"
       when:
-        - item.project == project_id_fact
+        - item.project == '{{ project_id_fact }}'
       loop: "{{ all_jt_info.json.results }}"
 
     - name: Display JT fact
