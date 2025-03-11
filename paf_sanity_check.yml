@@ -27,3 +27,19 @@
     - name: Display project info
       ansible.builtin.debug:
         var: project_info.json.results[0].id
+
+    - name: Get all job templates
+      ansible.builtin.uri:
+        url: "{{ tower_host }}/api/v2/job_templates
+        body_format: json
+        force_basic_auth: false
+        headers:
+          Authorization: "Bearer {{ lookup('env', 'TOWER_OAUTH_TOKEN') }}"
+        method: GET
+        status_code: 200
+        validate_certs: false
+      register: all_jt_info
+
+    - name: Display project info
+      ansible.builtin.debug:
+        var: all_jt_info.json.results[0].name
