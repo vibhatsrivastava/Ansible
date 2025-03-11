@@ -26,4 +26,4 @@
 
     - name: Display project info
       ansible.builtin.debug:
-        var: project_info
+        var: project_info.json.results[0].id
