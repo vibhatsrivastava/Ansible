@@ -25,8 +25,8 @@
       register: project_info
 
     - name: Display project info
-      ansible.builtin.debug:
-        var: project_info.json.results[0].id
+      ansible.builtin.set_fact:
+        project_id_fact: "{{ project_info.json.results[0].id }}"
 
     - name: Get all job templates
       ansible.builtin.uri:
@@ -41,6 +41,8 @@
       register: all_jt_info
 
     - name: Display project info
-      ansible.builtin.debug:
-        var: item.name
+      ansible.builtin.set_fact:
+        jt_config_array: "{{ jt_config_array | default([]) + item.name }}"
+      when:
+        - item.project == project_id_fact
       loop: "{{ all_jt_info.json.results }}"
