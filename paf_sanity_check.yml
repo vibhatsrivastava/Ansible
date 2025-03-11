@@ -1,0 +1,27 @@
+---
+- name: Playbook to check the settings required for a JT
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Validate the Project name is supplied as input
+      ansible.builtin.assert:
+        that:
+          - project_name is defined and project_name | length > 0
+        fail_msg: "'project_name' is mandatory to be supplied"
+        success_msg: "project_name is supplied {{ project_name }}"
+
+    - name: Verify that the project name exists
+      ansible.builtin.uri:
+        url: "{{ tower_host }}/api/v2/projects/?name={{ project_name }}"
+        body_format: json
+        force_basic_auth: false
+        headers:
+          Authorization: "Bearer {{ lookup('env', 'TOWER_OAUTH_TOKEN') }}"
+        method: GET
+        status_code: 200
+        validate_certs: false
+      register: project_info
+
+    - name: Display project info
+      ansible.builtin.debug:
+        var: project_info
