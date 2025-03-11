@@ -2,6 +2,8 @@
 - name: Playbook to check the settings required for a JT
   hosts: localhost
   connection: local
+  vars:
+    tower_host: '{{ lookup("env", "TOWER_HOST") }}'
   tasks:
     - name: Validate the Project name is supplied as input
       ansible.builtin.assert:
