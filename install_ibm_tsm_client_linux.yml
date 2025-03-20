@@ -38,7 +38,7 @@
         - name: Install RPM 1
           ansible.builtin.command: rpm -U /root/ibmtools/gskcrypt64-8.0.55.31.linux.x86_64.rpm /root/ibmtools/gskssl64-8.0.55.31.linux.x86_64.rpm
           register: rpm1_info
-          failed_when: (rpm1_info.rc != 0) or (rpm1_info.rc != 4)
+          failed_when: (rpm1_info.rc != '0') or (rpm1_info.rc != '4')
 
         - name: Display output
           ansible.builtin.debug:
