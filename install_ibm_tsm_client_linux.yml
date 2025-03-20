@@ -40,7 +40,7 @@
           register: rpm1_info
           failed_when: >
             (rpm1_info.rc == 0) or 
-            ("'is already installed' not in rpm1_info.stderr")
+            ("'is already installed' in rpm1_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -59,7 +59,7 @@
           register: rpm2_info
           failed_when: >
             (rpm2_info.rc == 0) or 
-            ("'is already installed' not in rpm2_info.stderr")
+            ("'is already installed' in rpm2_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
