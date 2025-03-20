@@ -53,7 +53,7 @@
             - rpm1_info.stdout | length > 0
 
         - name: Install RPM 2
-          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-API64.x86_64.rpm
+          ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-API64.x86_64.rpm --nosignature
           register: rpm2_info
           # failed_when: false
 
@@ -70,7 +70,7 @@
             - rpm2_info.stdout | length > 0
 
         - name: Install RPM 3
-          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-APIcit.x86_64.rpm
+          ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-APIcit.x86_64.rpm --nosignature
           register: rpm3_info
           # failed_when: false
 
@@ -87,7 +87,7 @@
             - rpm3_info.stdout | length > 0
 
         - name: Install RPM 4
-          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-BA.x86_64.rpm
+          ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-BA.x86_64.rpm --nosignature
           register: rpm4_info
           # failed_when: false
 
@@ -104,7 +104,7 @@
             - rpm4_info.stdout | length > 0
 
         - name: Install RPM 5
-          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-BAcit.x86_64.rpm
+          ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-BAcit.x86_64.rpm --nosignature
           register: rpm5_info
           # failed_when: false
 
@@ -121,7 +121,7 @@
             - rpm5_info.stdout | length > 0
 
         - name: Install RPM 6
-          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-BAhdw.x86_64.rpm
+          ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-BAhdw.x86_64.rpm --nosignature
           register: rpm6_info
           # failed_when: false
 
