@@ -1,0 +1,165 @@
+---
+- name: TSM Install Linux
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: TSM Install Linux (RHEL)
+      block:
+        - name: List directory content
+          ansible.builtin.command: ls -l /root/ibmtools
+          register: dir_info
+
+        - name: Display directory content
+          ansible.builtin.debug:
+            var: dir_info.stdout
+
+        - name: Check binary file exists
+          ansible.builtin.stat:
+            path: /root/ibmtools/8.1.20.0-TIV-TSMBAC-LinuxX86.tar
+          register: file_info
+
+        - name: Fail if file not exists
+          ansible.builtin.fail:
+            msg: "Binary file not found"
+          when:
+            - not file_info.stat.exists | bool
+
+        - name: Untar TSM
+          ansible.builtin.command: tar -xvf 8.1.20.0-TIV-TSMBAC-LinuxX86.tar
+          args:
+            chdir: /root/ibmtools
+          register: untar_info
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: untar_info.stdout_lines
+
+        - name: Install RPM 1
+          ansible.builtin.command: rpm -U /root/ibmtools/gskcrypt64-8.0.55.31.linux.x86_64.rpm /root/ibmtools/gskssl64-8.0.55.31.linux.x86_64.rpm
+          register: rpm1_info
+          # failed_when: false
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm1_info.stderr
+          when:
+            - rpm1_info.stderr | length > 0
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm1_info.stdout
+          when:
+            - rpm1_info.stdout | length > 0
+
+        - name: Install RPM 2
+          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-API64.x86_64.rpm
+          register: rpm2_info
+          # failed_when: false
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm2_info.stderr
+          when:
+            - rpm2_info.stderr | length > 0
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm2_info.stdout
+          when:
+            - rpm2_info.stdout | length > 0
+
+        - name: Install RPM 3
+          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-APIcit.x86_64.rpm
+          register: rpm3_info
+          # failed_when: false
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm3_info.stderr
+          when:
+            - rpm3_info.stderr | length > 0
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm3_info.stdout
+          when:
+            - rpm3_info.stdout | length > 0
+
+        - name: Install RPM 4
+          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-BA.x86_64.rpm
+          register: rpm4_info
+          # failed_when: false
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm4_info.stderr
+          when:
+            - rpm4_info.stderr | length > 0
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm4_info.stdout
+          when:
+            - rpm4_info.stdout | length > 0
+
+        - name: Install RPM 5
+          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-BAcit.x86_64.rpm
+          register: rpm5_info
+          # failed_when: false
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm5_info.stderr
+          when:
+            - rpm5_info.stderr | length > 0
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm5_info.stdout
+          when:
+            - rpm5_info.stdout | length > 0
+
+        - name: Install RPM 6
+          ansible.builtin.command: rpm -i /root/ibmtools/TIVsm-BAhdw.x86_64.rpm
+          register: rpm6_info
+          # failed_when: false
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm6_info.stderr
+          when:
+            - rpm6_info.stderr | length > 0
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm6_info.stdout
+          when:
+            - rpm6_info.stdout | length > 0
+
+        - name: Install RPM 7
+          ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-WEBGUI.x86_64.rpm
+          register: rpm7_info
+          # failed_when: false
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm7_info.stderr
+          when:
+            - rpm7_info.stderr | length > 0
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: rpm7_info.stdout
+          when:
+            - rpm7_info.stdout | length > 0
+
+      rescue:
+        - name: Set failure facts
+          ansible.builtin.set_fact:
+            exec_success: false
+            exec_changed: false
+            exec_rc: 1
+            exec_message: |
+              "Ansible Failed Task: {{ ansible_failed_task.name }}"
+              "Ansible Failure Message: {{ ansible_failed_result }}"
