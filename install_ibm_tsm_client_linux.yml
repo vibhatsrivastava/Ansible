@@ -38,7 +38,9 @@
         - name: Install RPM 1
           ansible.builtin.command: rpm -U /root/ibmtools/gskcrypt64-8.0.55.31.linux.x86_64.rpm /root/ibmtools/gskssl64-8.0.55.31.linux.x86_64.rpm
           register: rpm1_info
-          failed_when: "'is already installed' in rpm1_info.stderr"
+          failed_when: >
+            (rpm1_info.rc == 0) or 
+            ("'is already installed' not in rpm1_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -55,7 +57,9 @@
         - name: Install RPM 2
           ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-API64.x86_64.rpm --nosignature
           register: rpm2_info
-          failed_when: "'is already installed' in rpm2_info.stderr"
+          failed_when: >
+            (rpm2_info.rc == 0) or 
+            ("'is already installed' not in rpm2_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
