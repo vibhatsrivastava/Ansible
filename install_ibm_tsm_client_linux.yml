@@ -59,7 +59,7 @@
           register: rpm2_info
           failed_when: >
             (rpm2_info.rc == 0) or 
-            ("'is already installed' in rpm2_info.stderr")
+            not ("'is already installed' in rpm2_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -76,7 +76,9 @@
         - name: Install RPM 3
           ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-APIcit.x86_64.rpm --nosignature
           register: rpm3_info
-          # failed_when: false
+          failed_when: >
+            (rpm3_info.rc == 0) or 
+            not ("'is already installed' in rpm3_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -93,7 +95,9 @@
         - name: Install RPM 4
           ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-BA.x86_64.rpm --nosignature
           register: rpm4_info
-          # failed_when: false
+          failed_when: >
+            (rpm4_info.rc == 0) or 
+            not ("'is already installed' in rpm4_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -110,7 +114,9 @@
         - name: Install RPM 5
           ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-BAcit.x86_64.rpm --nosignature
           register: rpm5_info
-          # failed_when: false
+          failed_when: >
+            (rpm5_info.rc == 0) or 
+            not ("'is already installed' in rpm5_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -127,7 +133,9 @@
         - name: Install RPM 6
           ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-BAhdw.x86_64.rpm --nosignature
           register: rpm6_info
-          # failed_when: false
+          failed_when: >
+            (rpm6_info.rc == 0) or 
+            not ("'is already installed' in rpm6_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -144,7 +152,9 @@
         - name: Install RPM 7
           ansible.builtin.command: rpm -ivh /root/ibmtools/TIVsm-WEBGUI.x86_64.rpm
           register: rpm7_info
-          # failed_when: false
+          failed_when: >
+            (rpm7_info.rc == 0) or 
+            not ("'is already installed' in rpm7_info.stderr")
 
         - name: Display output
           ansible.builtin.debug:
@@ -157,6 +167,13 @@
             var: rpm7_info.stdout
           when:
             - rpm7_info.stdout | length > 0
+
+        - name: Set SUCCESS facts
+          ansible.builtin.set_fact:
+            exec_success: true
+            exec_changed: true
+            exec_rc: 0
+            exec_message: "TSM Agent installed successfully on Linux"
 
       rescue:
         - name: Set failure facts
