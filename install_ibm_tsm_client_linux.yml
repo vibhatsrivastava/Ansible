@@ -169,7 +169,7 @@
             - rpm7_info.stdout | length > 0
 
         - name: Set SUCCESS facts
-          ansible.builtin.set_fact:
+          ansible.builtin.set_stats:
             exec_success: true
             exec_changed: true
             exec_rc: 0
@@ -177,7 +177,7 @@
 
       rescue:
         - name: Set failure facts
-          ansible.builtin.set_fact:
+          ansible.builtin.set_stats:
             exec_success: false
             exec_changed: false
             exec_rc: 1
