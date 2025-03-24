@@ -49,77 +49,77 @@
           block:
             - name: Uninstall TIVsm-BAcit package
               ansible.builtin.command: rpm -e TIVsm-BAcit
-              register: remove_TIVsm-BAcit_info
+              register: remove_TIVsm_BAcit_info
               failed_when: >
-                not("'not installed' in remove_TIVsm-BAcit_info.stderr")
+                not("'not installed' in remove_TIVsm_BAcit_info.stderr")
 
             - name: Display output
               ansible.builtin.debug:
-                var: remove_TIVsm-BAcit_info.stdout
+                var: remove_TIVsm_BAcit_info.stdout
               when:
-                - remove_TIVsm-BAcit_info.stdout | length > 0
+                - remove_TIVsm_BAcit_info.stdout | length > 0
 
             - name: Display error
               ansible.builtin.debug:
-                var: remove_TIVsm-BAcit_info.stderr
+                var: remove_TIVsm_BAcit_info.stderr
               when:
-                - remove_TIVsm-BAcit_info.stderr | length > 0
+                - remove_TIVsm_BAcit_info.stderr | length > 0
 
             - name: Uninstall the backup-archive client
               ansible.builtin.command: rpm -e TIVsm-BA
-              register: remove_TIVsm-BA_info
+              register: remove_TIVsm_BA_info
               failed_when: >
-                not("'not installed' in remove_TIVsm-BA_info.stderr")
+                not("'not installed' in remove_TIVsm_BA_info.stderr")
 
             - name: Display output
               ansible.builtin.debug:
-                var: remove_TIVsm-BA_info.stdout
+                var: remove_TIVsm_BA_info.stdout
               when:
-                - remove_TIVsm-BA_info.stdout | length > 0
+                - remove_TIVsm_BA_info.stdout | length > 0
 
             - name: Display error
               ansible.builtin.debug:
-                var: remove_TIVsm-BA_info.error
+                var: remove_TIVsm_BA_info.error
               when:
-                - remove_TIVsm-BA_info.error | length > 0
+                - remove_TIVsm_BA_info.error | length > 0
 
         - name: Uninstall any products that depend on the API
           block:
             - name: Uninstall TIVsm-APIcit
               ansible.builtin.command: rpm -e TIVsm-APIcit
-              register: remove_TIVsm-APIcit_info
+              register: remove_TIVsm_APIcit_info
               failed_when: >
-                not("'not installed' in remove_TIVsm-APIcit_info.stderr")
+                not("'not installed' in remove_TIVsm_APIcit_info.stderr")
 
             - name: Display output
               ansible.builtin.debug:
-                var: remove_TIVsm-APIcit_info.stdout
+                var: remove_TIVsm_APIcit_info.stdout
               when:
-                - remove_TIVsm-APIcit_info.stdout | length > 0
+                - remove_TIVsm_APIcit_info.stdout | length > 0
 
             - name: Display error
               ansible.builtin.debug:
-                var: remove_TIVsm-APIcit_info.stderr
+                var: remove_TIVsm_APIcit_info.stderr
               when:
-                - remove_TIVsm-APIcit_info.stderr | length > 0
+                - remove_TIVsm_APIcit_info.stderr | length > 0
 
             - name: Uninstall the API package
               ansible.builtin.command: rpm -e TIVsm-API64
-              register: remove_TIVsm-API64_info
+              register: remove_TIVsm_API64_info
               failed_when: >
-                not("'not installed' in remove_TIVsm-API64_info.stderr")
+                not("'not installed' in remove_TIVsm_API64_info.stderr")
 
             - name: Display output
               ansible.builtin.debug:
-                var: remove_TIVsm-API64_info.stdout
+                var: remove_TIVsm_API64_info.stdout
               when:
-                - remove_TIVsm-API64_info.stdout | length > 0
+                - remove_TIVsm_API64_info.stdout | length > 0
 
             - name: Display error
               ansible.builtin.debug:
-                var: remove_TIVsm-API64_info.stderr
+                var: remove_TIVsm_API64_info.stderr
               when:
-                - remove_TIVsm-API64_info.stderr | length > 0
+                - remove_TIVsm_API64_info.stderr | length > 0
 
         - name: Remove the GSKit 64-bit package
           ansible.builtin.command: rpm -e gskcrypt64 gskssl64
