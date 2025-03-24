@@ -1,0 +1,96 @@
+---
+##################################################################################################################################################################
+# Use Case - Procedure to uninstall the Tivoli® Storage Manager Linux x86_64 client.
+# URL - https://www.ibm.com/docs/en/tsm/7.1.4?topic=clients-uninstalling-linux-x86-64-client
+# 1. You must be logged in as root to uninstall the product.
+# 2. Remove the packages for journal-based backup, the filepath component, the backup-archive client, the API, and the IBM Global Security Kit (GSKit)
+# 3. NOTE: The version number of the packages is not needed for uninstall.
+# 4. To uninstall the journal-based backup components only, remove both packages (journal-based backup and filepath).
+#    The TIVsm-JBB package depends on the filepath package. If you use two separate rpm -e commands to uninstall 
+#    the components one at a time, uninstall the TIVsm-JBB package first.
+# 5. Uninstall the backup-archive client packages
+#  5a. If you installed the optional TIVsm-BAcit package, uninstall it before you uninstall the client
+#  5b. Uninstall the backup-archive client
+# 6. Uninstall any products that depend on the API, such as IBM® Tivoli Storage Manager Data Protection products.
+#    Any API-dependent products must be uninstalled before you uninstall the API package.
+#    If you uninstall an API-dependent product, you must reinstall it after you install a newer version of the backup-archive client and API packages.
+#    Consult the documentation of the dependent product to determine what you need to do to prevent data loss when you uninstall and reinstall the products.
+#  6a. If you installed the optional API common inventory package (TIVsm-APIcit), uninstall it before you uninstall the API package.
+#  6b. Uninstall the API package
+# 7. To remove the GSKit 64-bit package
+#
+##################################################################################################################################################################
+- name: Uninstall TSM Linux Client
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: RHEL Block
+      block:
+        - name: Uninstall the journal-based backup components only, remove both packages (journal-based backup and filepath)
+          ansible.builtin.command: rpm -e TIVsm-JBB TIVsm-filepath
+          register: remove_journal_based_backup_info
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: remove_journal_based_backup_info.stdout
+
+        - name: Uninstall the backup-archive client packages
+          block:
+            - name: Uninstall TIVsm-BAcit package
+              ansible.builtin.command: rpm -e TIVsm-BAcit
+              register: remove_TIVsm-BAcit_info
+
+            - name: Display output
+              ansible.builtin.debug:
+                var: remove_TIVsm-BAcit_info.stdout
+
+            - name: Uninstall the backup-archive client
+              ansible.builtin.command: rpm -e TIVsm-BA
+              register: remove_TIVsm-BA_info
+
+            - name: Display output
+              ansible.builtin.debug:
+                var: remove_TIVsm-BA_info.stdout
+
+        - name: Uninstall any products that depend on the API
+          block:
+            - name: Uninstall TIVsm-APIcit
+              ansible.builtin.command: rpm -e TIVsm-APIcit
+              register: remove_TIVsm-APIcit_info
+
+            - name: Display output
+              ansible.builtin.debug:
+                var: remove_TIVsm-APIcit_info.stdout
+
+            - name: Uninstall the API package
+              ansible.builtin.command: rpm -e TIVsm-API64
+              register: remove_TIVsm-API64_info
+
+            - name: Display output
+              ansible.builtin.debug:
+                var: remove_TIVsm-API64_info.stdout
+
+        - name: Remove the GSKit 64-bit package
+          ansible.builtin.command: rpm -e gskcrypt64 gskssl64
+          register: remove_gskcrypt64_gskssl64_info
+
+        - name: Display output
+          ansible.builtin.debug:
+            var: remove_gskcrypt64_gskssl64_info.stdout
+
+        - name: Set SUCCESS facts
+          ansible.builtin.set_stats:
+            exec_success: true
+            exec_changed: true
+            exec_rc: 0
+            exec_message: "TSM Agent uninstalled successfully on Linux"
+      rescue:
+        - name: Set failure facts
+          ansible.builtin.set_stats:
+            exec_success: false
+            exec_changed: false
+            exec_rc: 1
+            exec_message: |
+              "Ansible Failed Task: {{ ansible_failed_task.name }}"
+              "Ansible Failure Message: {{ ansible_failed_result }}"
