@@ -141,16 +141,20 @@
 
         - name: Set SUCCESS facts
           ansible.builtin.set_stats:
-            exec_success: true
-            exec_changed: true
-            exec_rc: 0
-            exec_message: "TSM Agent uninstalled successfully on Linux"
+            data:
+              exec_success: true
+              exec_changed: true
+              exec_rc: 0
+              exec_message: "TSM Agent uninstalled successfully on Linux"
+            per_host: yes
       rescue:
         - name: Set failure facts
           ansible.builtin.set_stats:
-            exec_success: false
-            exec_changed: false
-            exec_rc: 1
-            exec_message: |
-              "Ansible Failed Task: {{ ansible_failed_task.name }}"
-              "Ansible Failure Message: {{ ansible_failed_result }}"
+            data:
+              exec_success: false
+              exec_changed: false
+              exec_rc: 1
+              exec_message: |
+                "Ansible Failed Task: {{ ansible_failed_task.name }}"
+                "Ansible Failure Message: {{ ansible_failed_result }}"
+            per_host: yes
