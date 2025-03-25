@@ -175,6 +175,7 @@
               exec_changed: true
               exec_rc: 0
               exec_message: "TSM Agent installed successfully on Linux"
+            per_host: yes
       rescue:
         - name: Set failure facts
           ansible.builtin.set_stats:
@@ -185,3 +186,4 @@
               exec_message: |
                 "Ansible Failed Task: {{ ansible_failed_task.name }}"
                 "Ansible Failure Message: {{ ansible_failed_result }}"
+            per_host: yes
