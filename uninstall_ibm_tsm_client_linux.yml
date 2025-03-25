@@ -24,6 +24,8 @@
   hosts: all
   gather_facts: true
   become: true
+  environment:
+    ANSIBLE_SHOW_CUSTOM_STATS: yes
   tasks:
     - name: RHEL Block
       block:
