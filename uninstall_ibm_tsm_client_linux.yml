@@ -28,8 +28,13 @@
     - name: RHEL Block
       block:
         - name: Uninstall the journal-based backup components only, remove both packages (journal-based backup and filepath)
-          ansible.builtin.command: rpm -e TIVsm-JBB TIVsm-filepath
+          ansible.builtin.dnf:
+            name: "{{ item }}"
+            state: absent
           register: remove_journal_based_backup_info
+          loop:
+            - TIVsm-JBB
+            - TIVsm-filepath
           failed_when: >
             not("'not installed' in remove_journal_based_backup_info.stderr")
 
@@ -48,7 +53,9 @@
         - name: Uninstall the backup-archive client packages
           block:
             - name: Uninstall TIVsm-BAcit package
-              ansible.builtin.command: rpm -e TIVsm-BAcit
+              ansible.builtin.dnf:
+                name: TIVsm-BAcit
+                state: absent
               register: remove_TIVsm_BAcit_info
               failed_when: >
                 not("'not installed' in remove_TIVsm_BAcit_info.stderr")
@@ -66,7 +73,9 @@
                 - remove_TIVsm_BAcit_info.stderr | length > 0
 
             - name: Uninstall the backup-archive client
-              ansible.builtin.command: rpm -e TIVsm-BA
+              ansible.builtin.dnf:
+                name: TIVsm-BA
+                state: absent
               register: remove_TIVsm_BA_info
               failed_when: >
                 not("'not installed' in remove_TIVsm_BA_info.stderr")
@@ -86,7 +95,9 @@
         - name: Uninstall any products that depend on the API
           block:
             - name: Uninstall TIVsm-APIcit
-              ansible.builtin.command: rpm -e TIVsm-APIcit
+              ansible.builtin.dnf:
+                name: TIVsm-APIcit
+                state: absent
               register: remove_TIVsm_APIcit_info
               failed_when: >
                 not("'not installed' in remove_TIVsm_APIcit_info.stderr")
@@ -104,7 +115,9 @@
                 - remove_TIVsm_APIcit_info.stderr | length > 0
 
             - name: Uninstall the API package
-              ansible.builtin.command: rpm -e TIVsm-API64
+              ansible.builtin.dnf:
+                name: TIVsm-API64
+                state: absent
               register: remove_TIVsm_API64_info
               failed_when: >
                 not("'not installed' in remove_TIVsm_API64_info.stderr")
@@ -122,7 +135,12 @@
                 - remove_TIVsm_API64_info.stderr | length > 0
 
         - name: Remove the GSKit 64-bit package
-          ansible.builtin.command: rpm -e gskcrypt64 gskssl64
+          ansible.builtin.dnf:
+            name: "{{ item }}"
+            state: absent
+          loop:
+            - gskcrypt64
+            - gskssl64
           register: remove_gskcrypt64_gskssl64_info
           failed_when: >
             not("'not installed' in remove_gskcrypt64_gskssl64_info.stderr")
