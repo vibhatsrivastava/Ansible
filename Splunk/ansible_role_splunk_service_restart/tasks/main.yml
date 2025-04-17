@@ -7,3 +7,15 @@
 - name: Show registerted output
   ansible.builtin.debug:
     var: os_family_info.ansible_facts['ansible_os_family']
+
+- name: Linux (Splunk service status)
+  ansible.builtin.command: '{{ linux_splunk_install_path }}/bin/splunk status'
+  become: '{{ set_become }}'
+  when:
+    - os_family_info.ansible_facts['ansible_os_family'] != 'Windows'
+    - os_family_info.ansible_facts['ansible_os_family'] in ['Debian']
+
+- name: Windows (Splunk service status)
+  ansible.windows.command: '{{ windows_splunk_install_path }}\bin\splunk status'
+  when:
+    - os_family_info.ansible_facts['ansible_os_family'] = 'Windows'

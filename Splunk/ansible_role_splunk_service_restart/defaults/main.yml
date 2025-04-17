@@ -1,2 +1,8 @@
 ---
-# defaults file for ansible_role_splunk_service_restart
+
+# Linux
+linux_splunk_install_path: '/opt/splunk'
+set_become: true
+
+# Windows
+windows_splunk_install_path: 'C:\Program Files\Splunk'
