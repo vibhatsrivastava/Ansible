@@ -2,10 +2,8 @@
 # Get OS Info
 - name: Get OS Info
   ansible.builtin.setup:
-    filter:
-      - 'ansible_os_family'
   register: os_family_info
 
 - name: Show registerted output
   ansible.builtin.debug:
-    var: os_family_info
+    var: os_family_info.ansible_facts['ansible_os_family']
