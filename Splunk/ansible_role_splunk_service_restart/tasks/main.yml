@@ -5,5 +5,5 @@
     gather_subset:
       - '!all'
       - '!min'
+    filter:
       - 'os_family'
-      - 'ansible_os_family'
