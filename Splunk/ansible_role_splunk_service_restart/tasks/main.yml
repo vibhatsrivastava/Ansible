@@ -18,4 +18,4 @@
 - name: Windows (Splunk service status)
   ansible.windows.win_command: '{{ windows_splunk_install_path }}\bin\splunk status'
   when:
-    - os_family_info.ansible_facts['ansible_os_family'] = 'Windows'
+    - os_family_info.ansible_facts['ansible_os_family'] == 'Windows'
