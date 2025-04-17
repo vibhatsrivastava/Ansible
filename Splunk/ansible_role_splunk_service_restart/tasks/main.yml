@@ -1,2 +1,4 @@
 ---
-# tasks file for ansible_role_splunk_service_restart
+# Get OS Info
+- name: Get OS Info
+  ansible.builtin.setup:
