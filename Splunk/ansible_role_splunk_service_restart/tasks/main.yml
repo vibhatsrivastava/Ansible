@@ -2,3 +2,7 @@
 # Get OS Info
 - name: Get OS Info
   ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "ansible_os_family"
