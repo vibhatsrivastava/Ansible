@@ -4,4 +4,4 @@
   tasks:
     - name: Call role to restart splunk service
       ansible.builtin.include_role:
-        - name: Splunk\ansible_role_splunk_service_restart
+        name: Splunk\ansible_role_splunk_service_restart
