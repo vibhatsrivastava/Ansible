@@ -3,6 +3,6 @@
 - name: Get OS Info
   ansible.builtin.setup:
     gather_subset:
-      - "!all"
-      - "!min"
-      - "os_family"
+      - '!all'
+      - '!min'
+      - 'os_family'
