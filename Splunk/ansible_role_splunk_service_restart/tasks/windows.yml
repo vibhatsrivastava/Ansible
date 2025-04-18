@@ -1,5 +1,5 @@
 ---
-- name: Windows (Splunk service status)
+- name: Windows (Splunk service restart)
   ansible.windows.win_command:
     argv:
       - '{{ windows_splunk_install_path }}\bin\splunk'
