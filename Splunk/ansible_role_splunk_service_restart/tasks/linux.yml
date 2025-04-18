@@ -18,4 +18,4 @@
     fact_rc: 0
     fact_msg: 'Splunk service state is running'
   when:
-    - "{{ 'splunkd is running' | regexsearch(linux_splunk_service_status_info.stdout) }}"
+    - "'splunkd is running' | regexsearch(linux_splunk_service_status_info.stdout)"
