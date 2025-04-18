@@ -18,4 +18,5 @@
     fact_rc: 0
     fact_msg: 'Splunk service state is running'
   when:
-    - "'splunkd is running' | regex_search(linux_splunk_service_status_info.stdout)"
+    - linux_splunk_service_status_info.stdout | ansible.builtin.regex_search('splunkd is running')
+
