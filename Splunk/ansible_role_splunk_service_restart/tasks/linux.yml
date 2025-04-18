@@ -25,6 +25,5 @@
     - name: Set success facts
       ansible.builtin.set_fact:
         fact_rc: 1
-        fact_msg: 'splunkd is not running'
         fact_task_name: "{{ ansible_failed_task.name }}"
         fact_task_error: "{{ ansible_failed_result }}"
