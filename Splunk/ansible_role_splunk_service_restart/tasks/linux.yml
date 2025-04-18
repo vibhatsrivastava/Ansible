@@ -1,0 +1,9 @@
+---
+- name: Linux (Splunk service status)
+  ansible.builtin.command: '{{ linux_splunk_install_path }}/bin/splunk restart'
+  become: '{{ set_become }}'
+  register: linux_splunk_service_restart_info
+
+- name: Show regsitered output
+  ansible.builtin.debug:
+    var: linux_splunk_service_restart_info

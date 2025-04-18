@@ -1,0 +1,11 @@
+---
+- name: Windows (Splunk service status)
+  ansible.windows.win_command:
+    argv:
+      - '{{ windows_splunk_install_path }}\bin\splunk'
+      - restart
+  register: windows_splunk_service_restart_info
+
+- name: Show regsitered output
+  ansible.builtin.debug:
+    var: windows_splunk_service_restart_info

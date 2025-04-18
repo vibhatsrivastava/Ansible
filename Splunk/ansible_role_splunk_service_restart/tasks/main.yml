@@ -1,5 +1,4 @@
 ---
-# Get OS Info
 - name: Get OS Info
   ansible.builtin.setup:
   register: os_family_info
@@ -8,17 +7,13 @@
   ansible.builtin.debug:
     var: os_family_info.ansible_facts['ansible_os_family']
 
-- name: Linux (Splunk service status)
-  ansible.builtin.command: '{{ linux_splunk_install_path }}/bin/splunk status'
-  become: '{{ set_become }}'
+- name: Linux (Splunk Service Restart)
+  ansible_builtin_include_tasks: linux.yml
   when:
     - os_family_info.ansible_facts['ansible_os_family'] != 'Windows'
     - os_family_info.ansible_facts['ansible_os_family'] in ['Debian']
 
-- name: Windows (Splunk service status)
-  ansible.windows.win_command:
-    argv:
-      - '{{ windows_splunk_install_path }}\bin\splunk'
-      - status
+- name: Windows (Splunk Service Restart)
+  ansible_builtin_include_tasks: windows.yml
   when:
     - os_family_info.ansible_facts['ansible_os_family'] == 'Windows'
