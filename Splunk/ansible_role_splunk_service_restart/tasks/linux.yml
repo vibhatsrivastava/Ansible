@@ -6,23 +6,23 @@
       become: '{{ set_become }}'
       register: linux_splunk_service_restart_info
 
-    - name: Show registered output
+    - name: Show Splunk service restart output
       ansible.builtin.debug:
         var: linux_splunk_service_restart_info
 
-    - name: Linux )Splunk Service Status)
+    - name: Linux (Splunk Service Status)
       ansible.builtin.command: '{{ linux_splunk_install_path }}/bin/splunk status'
       become: '{{ set_become }}'
       register: linux_splunk_service_status_info
 
-    - name: Set success facts
+    - name: Set success facts if splunk service is running
       ansible.builtin.set_fact:
         fact_rc: 0
         fact_msg: 'splunkd is running'
       when:
         - linux_splunk_service_status_info.stdout | ansible.builtin.regex_search('splunkd is running')
   rescue:
-    - name: Set success facts
+    - name: Set failure facts
       ansible.builtin.set_fact:
         fact_rc: 1
         fact_task_name: "{{ ansible_failed_task.name }}"
