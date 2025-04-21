@@ -1,0 +1,11 @@
+---
+- name: Playbook
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Set success stats if splunk service is running
+      ansible.builtin.set_stats:
+        data:
+          fact_rc: 0
+          fact_msg: 'splunkd is running'
+        per_host: yes
