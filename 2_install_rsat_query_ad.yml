@@ -1,6 +1,8 @@
 ---
 - name: Playbook to install RSAT AD PowerShell on Windows and Query Active Directory
   hosts: all
+  collection:
+    - microsoft.ad
   tasks:
     # - name: Install RSAT AD Module for PowerShell
     #   ansible.windows.win_feature:
