@@ -19,3 +19,7 @@
         domain_username: '{{ ansible_user }}'
         domain_password: '{{ ansible_password }}'
       register: ep_dn
+
+    - name: Display Distinguished Name of the computer object
+      ansible.builtin.debug:
+        var: ep_dn.objects[0].DistinguishedName
