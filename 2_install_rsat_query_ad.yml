@@ -15,7 +15,7 @@
 
     - name: AD command To get the DN of the endpoint
       microsoft.ad.object_info:
-        identity: 'client'
+        filter: ObjectClass -eq 'computer' -and Name -eq 'Client'
         domain_username: '{{ ansible_user }}'
         domain_password: '{{ ansible_password }}'
       register: ep_dn
