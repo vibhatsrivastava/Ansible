@@ -5,7 +5,7 @@
     - name: Install RSAT AD Module for PowerShell
       ansible.windows.win_feature:
         name: RSAT-AD-PowerShell
-        state: present
+        state: absent
         include_sub_features: true
       register: ad_module_output
 
