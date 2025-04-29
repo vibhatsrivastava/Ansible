@@ -2,19 +2,20 @@
 - name: Playbook to install RSAT AD PowerShell on Windows and Query Active Directory
   hosts: all
   tasks:
-    - name: Install RSAT AD Module for PowerShell
-      ansible.windows.win_feature:
-        name: RSAT-AD-PowerShell
-        state: present
-        include_sub_features: true
-      register: ad_module_output
+    # - name: Install RSAT AD Module for PowerShell
+    #   ansible.windows.win_feature:
+    #     name: RSAT-AD-PowerShell
+    #     state: present
+    #     include_sub_features: true
+    #   register: ad_module_output
 
-    - name: Validate AD Module is installed
-      ansible.windows.win_shell: Get-Module -ListAvailable -Name ActiveDirectory
-      register: ad_module_check
+    # - name: Validate AD Module is installed
+    #   ansible.windows.win_shell: Get-Module -ListAvailable -Name ActiveDirectory
+    #   register: ad_module_check
 
     - name: AD command To get the DN of the endpoint
-      ansible.windows.win_shell: |
-        Import-Module ActiveDirectory
-        Get-ADComputer -Identity Client
+      microsoft.ad.object_info:
+        identity: 'client'
+        domain_username: '{{ ansible_user }}'
+        domain_password: '{{ ansible_password }}'
       register: ep_dn
