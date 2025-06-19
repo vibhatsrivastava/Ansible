@@ -1,6 +1,6 @@
 ---
 - name: Connectivity test from ansible tower to VCenter
-  hosts: localhost
+  hosts: all
   connection: local
   vars:
     vcenter_hostname: "{{ lookup('env', 'VMWARE_HOST')}}"
