@@ -2,15 +2,16 @@
 - name: Playbook to list virtual machines in Hyper-V
   hosts: all
   vars:
-    Username: '{{ lookup("env", "ANSIBLE_NET_USERNAME") }}'
-    Password: '{{ lookup("env", "ANSIBLE_NET_PASSWORD") }}'
     hyperv_server: 'Hyper-V-1'
   tasks:
     - name: Create credentails object for Hyper-V
       ansible.windows.win_shell: |
-        [securestring]$secStringPassword = ConvertTo-SecureString '{{ Password }}' -AsPlainText -Force
-        [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ('{{ Username }}', $secStringPassword)
+        [securestring]$secStringPassword = ConvertTo-SecureString $env:Password -AsPlainText -Force
+        [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ($env:Username, $secStringPassword)
         Invoke-Command -ComputerName '{{ hyperv_server }}' -Credential $credObject -ScriptBlock {get-VM}
+      environment:
+        Username: '{{ lookup("env", "ANSIBLE_NET_USERNAME") }}'
+        Password: '{{ lookup("env", "ANSIBLE_NET_PASSWORD") }}'
       register: hyperv_vm_list
 
     - name: Show List of virtual machines hosted on Hyper-V
