@@ -1,6 +1,7 @@
 ---
 - name: Playbook to list virtual machines in Hyper-V
   hosts: all
+  gather_facts: false
   vars:
     hyperv_server: 'Hyper-V-1'
   tasks:
