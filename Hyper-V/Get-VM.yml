@@ -15,4 +15,9 @@
 
     - name: Get List of virtual machines hosted on Hyper-V
       ansible.windows.win_shell: |
-        Get-VM -ComputerName '{{ hyperv_server }}' -Credential '{{ ps_credobj }}'
+        Invoke-Command -ComputerName '{{ hyperv_server }}' -Credential '{{ ps_credobj }}' -ScriptBlock {get-VM}
+      register: hyperv_vm_list
+
+    - name: Show List of virtual machines hosted on Hyper-V
+      ansible.builtin.debug:
+        var: hyperv_vm_list
