@@ -10,14 +10,9 @@
       ansible.windows.win_shell: |
         [securestring]$secStringPassword = ConvertTo-SecureString '{{ Password }}' -AsPlainText -Force
         [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ('{{ Username }}', $secStringPassword)
-        Get-VM -ComputerName '{{ hyperv_server }}' -Credential $credObject
         Invoke-Command -ComputerName '{{ hyperv_server }}' -Credential $credObject -ScriptBlock {get-VM}
+      register: hyperv_vm_list
 
-    # - name: Get List of virtual machines hosted on Hyper-V
-    #   ansible.windows.win_shell: |
-        
-    #   register: hyperv_vm_list
-
-    # - name: Show List of virtual machines hosted on Hyper-V
-    #   ansible.builtin.debug:
-    #     var: hyperv_vm_list
+    - name: Show List of virtual machines hosted on Hyper-V
+      ansible.builtin.debug:
+        var: hyperv_vm_list
