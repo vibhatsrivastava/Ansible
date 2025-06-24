@@ -4,7 +4,7 @@
   vars:
     hyperv_server: 'Hyper-V-1'
   tasks:
-    - name: Create credentails object for Hyper-V
+    - name: Connect to Hyper-V and List VM's
       ansible.windows.win_shell: |
         [securestring]$secStringPassword = ConvertTo-SecureString $env:Password -AsPlainText -Force
         [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ($env:Username, $secStringPassword)
