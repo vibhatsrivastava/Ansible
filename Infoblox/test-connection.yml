@@ -20,6 +20,8 @@
 
     - name: Print NIOS Version
       debug:
-        msg: "{{ item.version }}"
+        msg: |
+          "{{ item.hostname }}"
+          "{{ item.platform }}"
       loop: "{{ infoblox_response.json }}"
     
