@@ -9,7 +9,7 @@
   tasks:
     - name: Check Infoblox Version
       uri:
-        url: "{{ infoblox_host }}//license"
+        url: "{{ infoblox_host }}/license"
         method: GET
         user: "{{ infoblox_user }}"
         password: "{{ infoblox_pass }}"
