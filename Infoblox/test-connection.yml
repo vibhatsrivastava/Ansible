@@ -3,7 +3,7 @@
   hosts: localhost
   connection: local
   vars:
-      infoblox_host: "https://192.168.1.150/wapi/v2.11"
+      infoblox_host: "https://192.168.1.150/wapi/v2.13"
       infoblox_user: "{{ lookup('env', 'ANSIBLE_NET_USERNAME') }}"
       infoblox_pass: "{{ lookup('env', 'ANSIBLE_NET_PASSWORD') }}"
   tasks:
