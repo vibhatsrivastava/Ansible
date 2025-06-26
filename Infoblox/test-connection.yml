@@ -21,7 +21,7 @@
     - name: Print NIOS Version
       debug:
         msg: |
-          "{{ item.hostname }}"
+          "{{ item.host_name }}"
           "{{ item.platform }}"
       loop: "{{ infoblox_response.json }}"
     
