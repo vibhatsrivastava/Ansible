@@ -4,8 +4,8 @@
   connection: local
   vars:
       infoblox_host: "https://192.168.1.150/wapi/v2.11"
-      infoblox_user: admin
-      infoblox_pass: infoblox
+      infoblox_user: "{{ lookup('env', 'ANSIBLE_NET_USERNAME') }}"
+      infoblox_pass: "{{ lookup('env', 'ANSIBLE_NET_PASSWORD') }}"
   tasks:
     - name: Check Infoblox Version
       uri:
