@@ -9,7 +9,7 @@
   tasks:
     - name: Check Infoblox Version
       uri:
-        url: "{{ infoblox_host }}/member"
+        url: "{{ infoblox_host }}/member?_return_fields=hostname,status"
         method: GET
         user: "{{ infoblox_user }}"
         password: "{{ infoblox_pass }}"
@@ -18,10 +18,10 @@
         return_content: yes
       register: infoblox_response
 
-    - name: Print NIOS Version
-      debug:
-        msg: |
-          "{{ item.host_name }}"
-          "{{ item.platform }}"
-      loop: "{{ infoblox_response.json }}"
+    # - name: Print NIOS Version
+    #   debug:
+    #     msg: |
+    #       "{{ item.host_name }}"
+    #       "{{ item.platform }}"
+    #   loop: "{{ infoblox_response.json }}"
     
