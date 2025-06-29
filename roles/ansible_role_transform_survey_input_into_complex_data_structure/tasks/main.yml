@@ -3,4 +3,5 @@
   ansible.builtin.template:
       src: templates/transform.j2
       dest: /var/tmp/paf_payload.txt
+  delegate_to: localhost
   become: true
