@@ -2,4 +2,4 @@
 - name: Transform survey data to complex data structure
   ansible.builtin.template:
       src: templates/transform.j2
-      dest: /tmp/paf_payload
+      dest: /home/vsrivastava/paf_payload
