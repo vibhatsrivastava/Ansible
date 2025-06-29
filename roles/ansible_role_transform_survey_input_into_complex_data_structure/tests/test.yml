@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - ansible_role_transform_survey_input_into_complex_data_structure
