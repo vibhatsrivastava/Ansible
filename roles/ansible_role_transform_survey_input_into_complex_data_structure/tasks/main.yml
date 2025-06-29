@@ -3,3 +3,4 @@
   ansible.builtin.template:
       src: templates/transform.j2
       dest: /home/vsrivastava/paf_payload
+  become: true
