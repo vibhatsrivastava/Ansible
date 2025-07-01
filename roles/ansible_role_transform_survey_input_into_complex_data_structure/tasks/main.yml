@@ -6,10 +6,10 @@
   become: true
 
 - name: Read file content
-  ansible.builtin.set_fact:
-    paf_trigger_payload: "{{ lookup('file', '/var/tmp/paf_payload.yml') }}"
-  delegate_to: localhost
+  ansible.builtin.command: cat '/var/tmp/paf_payload.yml'
+  registe: paf_trigger_payload
 
 - name: Show file content
   ansible.builtin.debug:
-    var: paf_trigger_payload
+    var: paf_trigger_payload | to_json
+
