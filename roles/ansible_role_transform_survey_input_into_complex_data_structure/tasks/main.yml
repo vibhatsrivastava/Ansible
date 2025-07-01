@@ -8,7 +8,7 @@
 - name: Read file content
   ansible.builtin.set_fact:
     paf_trigger_payload: "{{ lookup('file', '/var/tmp/paf_payload.yml') }}"
-  become: true
+  delegate_to: localhost
 
 - name: Show file content
   ansible.builtin.debug:
