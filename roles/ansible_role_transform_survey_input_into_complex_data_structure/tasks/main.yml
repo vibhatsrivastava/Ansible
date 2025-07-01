@@ -3,3 +3,11 @@
   ansible.builtin.template:
       src: templates/transform.j2
       dest: /var/tmp/paf_payload.yml
+
+- name: Read file content
+  ansible.builtin.set_fact:
+    paf_trigger_payload: "{{ lookup('ansible.builtin.file', '/var/tmp/paf_payload.yml') }}"
+
+- name: Show file content
+  ansible.builtin.debug:
+    var: paf_trigger_payload
