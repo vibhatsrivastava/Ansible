@@ -13,7 +13,7 @@
 
 - name: Read file content
   ansible.builtin.set_fact:
-    paf_trigger_payload: "{{ lookup('file', '/var/tmp/paf_payload.yml') }}"
+    paf_trigger_payload: "{{ contents }}"
   become: true
 
 - name: Show file content
