@@ -11,5 +11,5 @@
 
 - name: Show file content
   ansible.builtin.debug:
-    var: paf_trigger_payload | to_json
+    var: paf_trigger_payload
 
