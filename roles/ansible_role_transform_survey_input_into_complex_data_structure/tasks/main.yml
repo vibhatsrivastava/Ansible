@@ -5,12 +5,6 @@
       dest: /var/tmp/paf_payload.yml
   become: true
 
-# - name: Read file content
-#   ansible.builtin.file:
-#     path: '/var/tmp/paf_payload.yml'
-#     state: file
-#   register: paf_payload_content
-
 - name: Read file content
   ansible.builtin.set_fact:
     paf_trigger_payload: "{{ lookup('file', '/var/tmp/paf_payload.yml') }}"
