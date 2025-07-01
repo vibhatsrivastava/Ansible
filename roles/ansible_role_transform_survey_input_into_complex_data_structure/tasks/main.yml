@@ -7,7 +7,7 @@
 
 - name: Read file content
   ansible.builtin.command: cat '/var/tmp/paf_payload.yml'
-  registe: paf_trigger_payload
+  register: paf_trigger_payload
 
 - name: Show file content
   ansible.builtin.debug:
