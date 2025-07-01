@@ -8,7 +8,7 @@
 - name: Read file content
   ansible.builtin.file:
     path: '/var/tmp/paf_payload.yml'
-    state: present
+    state: file
     register: paf_payload_content
 
 # - name: Read file content
