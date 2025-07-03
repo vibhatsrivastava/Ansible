@@ -1,0 +1,12 @@
+- name: Playbook to reboot Windows endpoint
+  hosts: all
+  tasks:
+    - name: Reboot VM
+      ansible.windows.win_command: shutdown /r /c "Post Domain Join"
+
+    - name: Success
+      ansible.builtin.set_fact:
+        exec_success: true
+        exec_change: true
+        exec_rc: 0
+        exec_msg: "Windows endpoint rebooted successfully"
