@@ -12,6 +12,5 @@
         exec_msg: "Windows endpoint rebooted successfully"
 
     - name: Sleep for 300 seconds and continue with play
-      ansible.builtin.wait_for:
-        timeout: 300
-      delegate_to: localhost
+      ansible.builtin.pause:
+        minutes: 1
