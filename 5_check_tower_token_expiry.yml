@@ -46,7 +46,7 @@
           ansible.builtin.debug:
             msg: "The tower token has not expired and currently working (active)"
           when:
-            - tokens_info.status != 200
+            - tokens_info.status == 200
       rescue:
         - name: Set failure fact
           ansible.builtin.set_fact:
