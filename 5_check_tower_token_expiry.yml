@@ -40,6 +40,7 @@
             status_code: 200
             body_format: json
             validate_certs: false
+          no_log: true
           register: tokens_info
 
         - name: Confirm that the current token is working
