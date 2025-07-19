@@ -1,0 +1,16 @@
+---
+- name: Playbook to check if the tower token has expired
+  hosts: localhost
+  connection: local
+  vars:
+    tower_host: "{{ lookup('env', 'TOWER_HOST') }}"
+  tasks:
+    - name: Get tower token details
+      ansible.builtin.uri:
+        url: "{{ tower_host }}/api/v2/tokens"
+        return_content: true
+        method: GET
+        status_code: 200
+        body_format: json
+        validate_certs: false
+      register: tokens_info
