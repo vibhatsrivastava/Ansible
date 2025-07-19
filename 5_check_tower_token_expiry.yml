@@ -9,6 +9,8 @@
       ansible.builtin.uri:
         url: "{{ tower_host }}/api/v2/tokens"
         return_content: true
+        headers:
+          Authorization: "Bearer {{ lookup('env', 'TOWER_OAUTH_TOKEN') }}"
         method: GET
         status_code: 200
         body_format: json
