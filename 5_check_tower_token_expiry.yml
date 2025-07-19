@@ -16,3 +16,7 @@
         body_format: json
         validate_certs: false
       register: tokens_info
+
+    - name: Show expiry details
+      ansible.builtin.debug:
+        var: tokens_info.json.results[0].expires
