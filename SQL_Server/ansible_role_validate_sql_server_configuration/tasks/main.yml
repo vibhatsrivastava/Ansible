@@ -44,6 +44,9 @@
       $TraceFlag_Info = "Trace flag value is currently set to $($TraceFlag_Query.TraceFlag)"
     }
 
+    # Step-8
+    $SQL_Server_Settings_Query = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name IN ('max server memory (MB)', 'min server memory (MB)');" -ServerInstance "{{ SQL_Server_Instance }}"
+
     # Report Compilation
     $SQL_Server_Config_Validation_Report += $SQL_Instance_Info
     $SQL_Server_Config_Validation_Report += $Replication_Info
@@ -51,6 +54,7 @@
     $SQL_Server_Config_Validation_Report += $Filestream_info
     $SQL_Server_Config_Validation_Report += $SQLServer_Service_StartType_Info
     $SQL_Server_Config_Validation_Report += $TraceFlag_Info
+    $SQL_Server_Config_Validation_Report += $SQL_Server_Settings_Query
 
     # Display Report Data
     $SQL_Server_Config_Validation_Report
