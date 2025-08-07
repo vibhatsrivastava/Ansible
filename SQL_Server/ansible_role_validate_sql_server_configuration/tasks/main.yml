@@ -42,7 +42,7 @@
 
 - name: Update IsFullTextInstalled details into report
   ansible.builtin.set_fact:
-    configuration_report: "\n\n IsFullTextInstalled: {{ [ configuration_report | default([]) ] + [ IsFulTextInstalled_info.stdout_lines[0] ] }}"
+    configuration_report: "\n\n IsFullTextInstalled: {{ [ configuration_report | default([]) ] + [ IsFullTextInstalled_info.stdout_lines[0] ] }}"
 
 - name: Get Filestream status Info
   ansible.windows.win_shell: |
