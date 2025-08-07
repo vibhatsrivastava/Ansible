@@ -1,22 +1,22 @@
 ---
-- name: Get SQL instance name details
+- name: Get SQL instance name info
   ansible.windows.win_shell: |
     Import-Module sqlserver
     Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
   register: sql_instance_info
 
-- name: Update report
+- name: Update SQL instance details into report
   ansible.builtin.set_fact:
     configuration_report: "{{ configuration_report | default([]) + [ sql_instance_info ] }}"
 
-- name: Check DB connection
-  community.general.mssql_script:
-    login_user: "{{ ansible_user }}"
-    login_password: "{{ ansible_password }}"
-    login_host: "{{ mssql_host }}"
-    login_port: "{{ mssql_port }}"
-    db: master
-    script: "SELECT 1"
+- name: Get SQL server replication feature info
+  ansible.windows.win_shell:
+    Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
+  register: sql_replication_info
+
+- name: Update SQL server replication details into report
+  ansible.builtin.set_fact:
+    configuration_report: "{{ configuration_report | default([]) + [ sql_replication_info ] }}"
 
 - name: Show report
   ansible.builtin.debug:
