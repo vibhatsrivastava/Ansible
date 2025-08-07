@@ -32,4 +32,8 @@
     $SQL_Server_Config_Validation_Report += $Filestream_info
     $SQL_Server_Config_Validation_Report += $SQLServer_Service_StartType_Info
 
+    if(not(test-path "{{ report_dir}}"))
+    {
+      New-Item -Name "{{ report_dir}}" -ItemType Directory -Force
+    }
     Write-Output $SQL_Server_Config_Validation_Report | Out-File "{{ report_dir}}\{{ report_filename }}" -Force
