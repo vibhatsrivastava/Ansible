@@ -1,74 +1,23 @@
 ---
 - name: Get SQL instance name info
   ansible.windows.win_shell: |
-    Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
-  register: sql_instance_info
-
-- name: Update SQL instance details into report
-  ansible.builtin.set_fact:
-    configuration_report: "\n\n SQL Instance Info: {{ [ configuration_report | default([]) ] + [ sql_instance_info.stdout_lines[0] ] }}"
-
-- name: Get SQL replication feature info (for all databases)
-  ansible.builtin.win_shell: |
+    $SQL_Instance = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
+    
     $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
-    $All_SQL_Database.Name | foreach-object {Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $_}
-  register: sql_replication_info
+    $SQL_Replication_Info = $All_SQL_Database.Name | foreach-object {Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $_}
+    
+    $sql_max_text_repl_size_info = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
 
-- name: Update SQL server db replication details into report
-  ansible.builtin.set_fact:
-    configuration_report: "\n\n DB Replication Info: {{ [ configuration_report | default([]) ] + [ sql_replication_info.stdout_lines[0] ] }}"
-
-- name: Get SQL server max text repl size info
-  ansible.windows.win_shell: |
-    Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
-  register: sql_max_text_repl_size_info
-
-- name: Update SQL server max text repl size details into report
-  ansible.builtin.set_fact:
-    configuration_report: "\n\n Max Text Repl Size Info: {{ [ configuration_report | default([]) ] + [ sql_max_text_repl_size_info.stdout_lines[0] ] }}"
-
-- name: Get IsFullTextInstalled info
-  ansible.windows.win_shell: |
     $IsFullTextInstalled = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsFullTextInstalled') AS FullTextSearchInstalled;" -ServerInstance "{{ SQL_Server_Instance }}"
-    if($IsFullTextInstalled.FullTextSearchInstalled -eq 0 )
-    {
-      write-Output $False
-    }
-    else
-    { 
-     write-output $True
-    }
-  register: IsFullTextInstalled_info
+    if($IsFullTextInstalled.FullTextSearchInstalled -eq 0 ) { $IsFullTextInstalled_Info = "IsFullTextInstalled: $False" } else { $IsFullTextInstalled_Info = "IsFullTextInstalled: $True" }
 
-- name: Update IsFullTextInstalled details into report
-  ansible.builtin.set_fact:
-    configuration_report: "\n\n IsFullTextInstalled: {{ [ configuration_report | default([]) ] + [ IsFullTextInstalled_info.stdout_lines[0] ] }}"
-
-- name: Get Filestream status Info
-  ansible.windows.win_shell: |
     $Filestream_status = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT value_in_use FROM sys.configurations WHERE name = 'filestream access level';" -ServerInstance "{{ SQL_Server_Instance }}"
-    if($Filestream_status.value_in_use -eq 0)
-    {
-      write-output "Disabled"
-    }
-    elseif($Filestream_status.value_in_use -eq 1)
-    {
-      write-output "T-SQL access only"
-    }
-    elseif($Filestream_status.value_in_use -eq 2)
-    {
-      write-output "T-SQL and Win32 streaming access"
-    }
-    else
-    {
-      write-output "Incorrect / Garbage value obtained"
-    }
-  register: Filestream_info
+    if($Filestream_status.value_in_use -eq 0) { $Filestream_info = "Filestream_info: Disabled" }
+    elseif($Filestream_status.value_in_use -eq 1) { $Filestream_info = "Filestream_info: T-SQL access only" }
+    elseif($Filestream_status.value_in_use -eq 2) { $Filestream_info =  "Filestream_info: T-SQL and Win32 streaming access" }
+    else { $Filestream_info =  "Filestream_info: Incorrect / Garbage value obtained" }
 
-- name: Update IsFullTextInstalled details into report
-  ansible.builtin.set_fact:
-    configuration_report: "\n\n IsFullTextInstalled: {{ [ configuration_report | default([]) ] + [ Filestream_info.stdout_lines[0] ] }}"
-
-- name: Show report
-  ansible.builtin.debug:
-    var: configuration_report
+    $SQL_Instance
+    $SQL_Replication_Info
+    $IsFullTextInstalled_Info
+    $Filestream_info
