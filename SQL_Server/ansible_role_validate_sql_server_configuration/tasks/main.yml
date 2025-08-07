@@ -4,7 +4,7 @@
     $SQL_Instance = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
     
     $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
-    #$SQL_Replication_Info = 
+    $db_replication_info = [System.Collections.ArrayList]@()
     foreach($db in $All_SQL_Database.Name)
     { 
       $db_replication_info += Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
