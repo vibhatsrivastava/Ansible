@@ -30,6 +30,6 @@
     else { $Filestream_info =  "Filestream_info: Incorrect / Garbage value obtained" }
 
     $SQL_Instance
-    $db_replication_info
+    $replication_info
     $IsFullTextInstalled_Info
     $Filestream_info
