@@ -1,0 +1,12 @@
+---
+- name: Get SQL instance name details
+  ansible.windows.win_shell: Get-SqlInstance -ServerInstance localhost
+  register: sql_instance_info
+
+- name: Update report
+  ansible.builtin.set_fact:
+    configuration_report: "{{ configuration_report | default([]) + [ sql_instance_info ] }}"
+
+- name: Show report
+  ansible.builtin.debug:
+    var: configuration_report

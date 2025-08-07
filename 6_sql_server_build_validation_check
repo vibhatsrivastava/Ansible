@@ -1,0 +1,11 @@
+---
+- name: SQL Server Configuration Validation Check
+  hosts: all
+  gather_facts: yes
+  vars:
+    configuration_report: []
+  become: yes
+  tasks:
+    - name: Include role - sql server configuration validation
+      ansible.builtin.include_role:
+        name: ansible_role_validate_sql_server_configuration
