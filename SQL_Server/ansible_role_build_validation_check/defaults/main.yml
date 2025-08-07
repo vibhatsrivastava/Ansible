@@ -1,6 +1,0 @@
----
-sql_instance_name: "MSSQLSERVER"
-expected_sql_version: "15.0"  # SQL Server 2019
-data_drive_letter: "D"
-log_drive_letter: "L"
-tempdb_drive_letter: "T"
