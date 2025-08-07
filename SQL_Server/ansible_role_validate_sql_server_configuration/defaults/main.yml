@@ -1,5 +1,3 @@
 ---
 SQL_Server_Name: localhost
-
-mssql_host: "{{ SQL_Server_Name }}"
-mssql_port: 1433
+SQL_Server_Instance: '.'
