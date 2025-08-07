@@ -22,10 +22,11 @@
     elseif($Filestream_status.value_in_use -eq 2) { $Filestream_Info =  "Filestream_Info: T-SQL and Win32 streaming access" }
     else { $Filestream_Info =  "Filestream_Info: Incorrect / Garbage value obtained" }
 
-    $SQLServer_Service_StartType = "SQL Server Service Startup Type: $(get-service MSSQLSERVER).StartType | out-string)"
-    $SQLServer_Service_StartType_Info = 
+    $SQLServer_Service_StartType = (get-service MSSQLSERVER).StartType
+    $SQLServer_Service_StartType_Info = "SQL Server Service Startup Type: $SQLServer_Service_StartType"
 
     $SQL_Instance_Info
     $Replication_Info
     $IsFullTextInstalled_Info
     $Filestream_info
+    $SQLServer_Service_StartType_Info
