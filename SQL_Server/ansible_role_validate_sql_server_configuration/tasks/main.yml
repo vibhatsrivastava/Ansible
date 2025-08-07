@@ -2,7 +2,7 @@
 - name: Get SQL instance name details
   ansible.windows.win_shell: |
     Import-Module sqlserver
-    #Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
+    Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
   register: sql_instance_info
 
 - name: Update report
