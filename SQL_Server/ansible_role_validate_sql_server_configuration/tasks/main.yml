@@ -7,7 +7,7 @@
     $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
     foreach($db in $All_SQL_Database.Name)
     { 
-      $db_replication_info += Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
+      $db_replication_info = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
       if($null -eq $db_replication_info.ReplicationInstalled)
       {
         $replication_info += "$db replication info = NA"
