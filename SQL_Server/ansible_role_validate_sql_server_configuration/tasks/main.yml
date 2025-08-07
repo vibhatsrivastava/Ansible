@@ -51,6 +51,12 @@
     $SQL_Server_Cost_Threshold_for_Parallelism = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'cost threshold for parallelism';" -ServerInstance "{{ SQL_Server_Instance }}"
     $SQL_Server_Adhoc_Workload = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'optimize for ad hoc workloads';" -ServerInstance "{{ SQL_Server_Instance }}"
     $SQL_Server_Remote_Login_Timeout = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name LIKE '%timeout%';" -ServerInstance "{{ SQL_Server_Instance }}"
+    $SQL_Server_DAC = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'remote admin connections';" -ServerInstance "{{ SQL_Server_Instance }}"
+
+    # Step-9
+
+    # Step-10
+    $SQL_Server_check_recovery_models = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name AS [DatabaseName], recovery_model_desc AS [RecoveryModel]FROM sys.databases;" -ServerInstance "{{ SQL_Server_Instance }}"
 
     # Report Compilation
     $SQL_Server_Config_Validation_Report += $SQL_Instance_Info
@@ -76,6 +82,10 @@
     $SQL_Server_Config_Validation_Report += $SQL_Server_Adhoc_Workload
     $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $SQL_Server_Remote_Login_Timeout
+    $SQL_Server_Config_Validation_Report += "`r`n"
+    $SQL_Server_Config_Validation_Report += $SQL_Server_DAC
+    $SQL_Server_Config_Validation_Report += "`r`n"
+    $SQL_Server_Config_Validation_Report += $SQL_Server_check_recovery_models
 
     # Display Report Data
     $SQL_Server_Config_Validation_Report
