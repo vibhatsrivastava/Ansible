@@ -8,7 +8,7 @@
     foreach($db in $All_SQL_Database.Name)
     { 
       $db_replication_info = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
-      $replication_info += "$db replication info : `r`n$db_replication_info"
+      $replication_info += "$db replication info : `r`n$($db_replication_info.ReplicationInstalled | out-string)"
     }
     
     $sql_max_text_repl_size_info = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
