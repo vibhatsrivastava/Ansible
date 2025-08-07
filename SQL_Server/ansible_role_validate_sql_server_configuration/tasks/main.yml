@@ -6,7 +6,7 @@
 
 - name: Update SQL instance details into report
   ansible.builtin.set_fact:
-    configuration_report: "SQL Instance Info: \n\n {{ [ configuration_report | default([]) ] + [ sql_instance_info.stdout_lines ] }}"
+    configuration_report: "\n\n SQL Instance Info: {{ [ configuration_report | default([]) ] + [ sql_instance_info.stdout_lines ] }}"
 
 - name: Get SQL replication feature info (for all databases)
   ansible.builtin.win_shell: |
@@ -16,7 +16,7 @@
 
 - name: Update SQL server db replication details into report
   ansible.builtin.set_fact:
-    configuration_report: "DB Replication Info: \n\n {{ [ configuration_report | default([]) ] + [ sql_replication_info.stdout_lines ] }}"
+    configuration_report: "\n\n DB Replication Info: {{ [ configuration_report | default([]) ] + [ sql_replication_info.stdout_lines ] }}"
 
 - name: Get SQL server max text repl size info
   ansible.windows.win_shell: |
@@ -25,7 +25,7 @@
 
 - name: Update SQL server max text repl size details into report
   ansible.builtin.set_fact:
-    configuration_report: "Max Text Repl Size Info: \n\n {{ [ configuration_report | default([]) ] + [ sql_max_text_repl_size_info.stdout_lines ] }}"
+    configuration_report: "\n\n Max Text Repl Size Info: {{ [ configuration_report | default([]) ] + [ sql_max_text_repl_size_info.stdout_lines ] }}"
 
 - name: Get IsFullTextInstalled info
   ansible.windows.win_shell: |
@@ -34,7 +34,7 @@
 
 - name: Update IsFullTextInstalled details into report
   ansible.builtin.set_fact:
-    configuration_report: "IsFullTextInstalled Info: \n\n {{ [ configuration_report | default([]) ] + [ IsFullTextInstalled_info.stdout_lines ] }}"
+    configuration_report: "\n\n IsFullTextInstalled Info: {{ [ configuration_report | default([]) ] + [ IsFullTextInstalled_info.stdout_lines ] }}"
 
 - name: Show report
   ansible.builtin.debug:
