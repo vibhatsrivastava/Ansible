@@ -50,12 +50,19 @@
 
     # Report Compilation
     $SQL_Server_Config_Validation_Report += $SQL_Instance_Info
+    $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $Replication_Info
+    $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $IsFullTextInstalled_Info
+    $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $Filestream_info
+    $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $SQLServer_Service_StartType_Info
+    $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $TraceFlag_Info
+    $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $SQL_Server_Max_Mix_Memory
+    $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $SQL_Server_Authentication_Mode
 
     # Display Report Data
