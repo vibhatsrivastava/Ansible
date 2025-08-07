@@ -1,20 +1,20 @@
 ---
 - name: Get SQL server configuration info
   ansible.windows.win_shell: |
-    $SQL_Instance = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
+    $SQL_Instance_info = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
     
-    $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
     $replication_info = [System.Collections.ArrayList]@()
+    $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
     foreach($db in $All_SQL_Database.Name)
     { 
       $db_replication_info += Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
       if($null -eq $db_replication_info.ReplicationInstalled)
       {
-        replication_info += "$db replication info = NA"
+        $replication_info += "$db replication info = NA"
       }
       else
       {
-        replication_info += "$db replication info = $db_replication_info.ReplicationInstalled"
+        $replication_info += "$db replication info = $db_replication_info.ReplicationInstalled"
       }
     }
     
@@ -29,7 +29,7 @@
     elseif($Filestream_status.value_in_use -eq 2) { $Filestream_info =  "Filestream_info: T-SQL and Win32 streaming access" }
     else { $Filestream_info =  "Filestream_info: Incorrect / Garbage value obtained" }
 
-    $SQL_Instance
+    $SQL_Instance_info
     $replication_info
     $IsFullTextInstalled_Info
     $Filestream_info
