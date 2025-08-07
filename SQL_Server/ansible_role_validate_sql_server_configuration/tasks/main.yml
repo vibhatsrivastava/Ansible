@@ -4,7 +4,11 @@
     $SQL_Instance = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
     
     $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
-    $SQL_Replication_Info = $All_SQL_Database.Name | foreach-object {Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $_}
+    #$SQL_Replication_Info = 
+    foreach($db in $All_SQL_Database.Name)
+    { 
+      $db_replication_info += Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $_
+    }
     
     $sql_max_text_repl_size_info = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
 
@@ -18,6 +22,6 @@
     else { $Filestream_info =  "Filestream_info: Incorrect / Garbage value obtained" }
 
     $SQL_Instance
-    $SQL_Replication_Info
+    $db_replication_info
     $IsFullTextInstalled_Info
     $Filestream_info
