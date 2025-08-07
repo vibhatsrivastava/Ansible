@@ -47,6 +47,9 @@
     # Step-8
     $SQL_Server_Max_Mix_Memory = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name IN ('max server memory (MB)', 'min server memory (MB)');" -ServerInstance "{{ SQL_Server_Instance }}"
     $SQL_Server_Authentication_Mode = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT CASE SERVERPROPERTY('IsIntegratedSecurityOnly') WHEN 1 THEN 'Windows Authentication Only' WHEN 0 THEN 'Mixed Mode (SQL Server and Windows Authentication)' ELSE 'Unknown'END AS AuthenticationMode;" -ServerInstance "{{ SQL_Server_Instance }}"
+    $SQL_Server_MAXDOP = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'max degree of parallelism';" -ServerInstance "{{ SQL_Server_Instance }}"
+    $SQL_Server_Cost_Threshold_for_Parallelism = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'cost threshold for parallelism';" -ServerInstance "{{ SQL_Server_Instance }}"
+    $SQL_Server_Adhoc_Workload = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'optimize for ad hoc workloads';" -ServerInstance "{{ SQL_Server_Instance }}"
 
     # Report Compilation
     $SQL_Server_Config_Validation_Report += $SQL_Instance_Info
@@ -64,6 +67,12 @@
     $SQL_Server_Config_Validation_Report += $SQL_Server_Max_Mix_Memory
     $SQL_Server_Config_Validation_Report += "`r`n"
     $SQL_Server_Config_Validation_Report += $SQL_Server_Authentication_Mode
+    $SQL_Server_Config_Validation_Report += "`r`n"
+    $SQL_Server_Config_Validation_Report += $SQL_Server_MAXDOP
+    $SQL_Server_Config_Validation_Report += "`r`n"
+    $SQL_Server_Config_Validation_Report += $SQL_Server_Cost_Threshold_for_Parallelism
+    $SQL_Server_Config_Validation_Report += "`r`n"
+    $SQL_Server_Config_Validation_Report += $SQL_Server_Adhoc_Workload
 
     # Display Report Data
     $SQL_Server_Config_Validation_Report
