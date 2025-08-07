@@ -9,14 +9,14 @@
   ansible.builtin.set_fact:
     configuration_report: "{{ configuration_report | default([]) + [ sql_instance_info ] }}"
 
-- name: Get SQL server replication feature info
+- name: Get SQL server max text repl size info
   ansible.windows.win_shell:
     Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
-  register: sql_replication_info
+  register: sql_max_text_repl_size_info
 
-- name: Update SQL server replication details into report
+- name: Update SQL server max text repl size details into report
   ansible.builtin.set_fact:
-    configuration_report: "{{ configuration_report | default([]) + [ sql_replication_info ] }}"
+    configuration_report: "{{ configuration_report | default([]) + [ sql_max_text_repl_size_info ] }}"
 
 - name: Show report
   ansible.builtin.debug:
