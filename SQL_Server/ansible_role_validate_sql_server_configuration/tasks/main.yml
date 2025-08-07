@@ -4,10 +4,18 @@
     $SQL_Instance = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
     
     $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
-    $db_replication_info = [System.Collections.ArrayList]@()
+    $replication_info = [System.Collections.ArrayList]@()
     foreach($db in $All_SQL_Database.Name)
     { 
       $db_replication_info += Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
+      if($null -eq $db_replication_info.ReplicationInstalled)
+      {
+        replication_info += "$db replication info = NA"
+      }
+      else
+      {
+        replication_info += "$db replication info = $db_replication_info.ReplicationInstalled"
+      }
     }
     
     $sql_max_text_repl_size_info = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
