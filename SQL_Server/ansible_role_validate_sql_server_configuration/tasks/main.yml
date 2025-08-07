@@ -1,14 +1,14 @@
 ---
-- name: Get SQL server configuration info
+- name: Get SQL server configuration Info
   ansible.windows.win_shell: |
-    $SQL_Instance_info = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
+    $SQL_Instance_Info = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
     
-    $replication_info = [System.Collections.ArrayList]@()
+    $Replication_Info = [System.Collections.ArrayList]@()
     $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
     foreach($db in $All_SQL_Database.Name)
     { 
       $db_replication_info = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
-      $replication_info += "$db replication info : `r`n$($db_replication_info.ReplicationInstalled | out-string)"
+      $Replication_Info += "$db Replication Info : `r`n$($db_replication_info.ReplicationInstalled | out-string)"
     }
     
     $sql_max_text_repl_size_info = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
@@ -17,12 +17,15 @@
     if($IsFullTextInstalled.FullTextSearchInstalled -eq 0 ) { $IsFullTextInstalled_Info = "IsFullTextInstalled: $False" } else { $IsFullTextInstalled_Info = "IsFullTextInstalled: $True" }
 
     $Filestream_status = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT value_in_use FROM sys.configurations WHERE name = 'filestream access level';" -ServerInstance "{{ SQL_Server_Instance }}"
-    if($Filestream_status.value_in_use -eq 0) { $Filestream_info = "Filestream_info: Disabled" }
-    elseif($Filestream_status.value_in_use -eq 1) { $Filestream_info = "Filestream_info: T-SQL access only" }
-    elseif($Filestream_status.value_in_use -eq 2) { $Filestream_info =  "Filestream_info: T-SQL and Win32 streaming access" }
-    else { $Filestream_info =  "Filestream_info: Incorrect / Garbage value obtained" }
+    if($Filestream_status.value_in_use -eq 0) { $Filestream_Info = "Filestream_Info: Disabled" }
+    elseif($Filestream_status.value_in_use -eq 1) { $Filestream_Info = "Filestream_Info: T-SQL access only" }
+    elseif($Filestream_status.value_in_use -eq 2) { $Filestream_Info =  "Filestream_Info: T-SQL and Win32 streaming access" }
+    else { $Filestream_Info =  "Filestream_Info: Incorrect / Garbage value obtained" }
 
-    $SQL_Instance_info
-    $replication_info
+    $SQLServer_Service_StartType = "SQL Server Service Startup Type: $(get-service MSSQLSERVER).StartType | out-string)"
+    $SQLServer_Service_StartType_Info = 
+
+    $SQL_Instance_Info
+    $Replication_Info
     $IsFullTextInstalled_Info
     $Filestream_info
