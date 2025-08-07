@@ -1,5 +1,5 @@
 ---
-- name: Get SQL instance name info
+- name: Get SQL server configuration info
   ansible.windows.win_shell: |
     $SQL_Instance = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
     
@@ -7,7 +7,7 @@
     #$SQL_Replication_Info = 
     foreach($db in $All_SQL_Database.Name)
     { 
-      $db_replication_info += Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $_
+      $db_replication_info += Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
     }
     
     $sql_max_text_repl_size_info = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
