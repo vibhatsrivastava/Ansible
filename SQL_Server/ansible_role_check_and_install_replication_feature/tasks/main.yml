@@ -9,7 +9,7 @@
     # Function to log messages
     function Log-Message {
         param([string]$message)
-        Add-Content -Path  -Value "$timestamp - $message"
+        Add-Content -Path $logFile -Value "$timestamp - $message"
         Write-Host $message
     }
 
