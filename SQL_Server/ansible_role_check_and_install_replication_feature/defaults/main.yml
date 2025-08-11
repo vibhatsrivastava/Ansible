@@ -1,0 +1,3 @@
+---
+SQL_Server_Instance: 'localhost'
+logfile: 'C:\ansible\ReplicationAudit.log'

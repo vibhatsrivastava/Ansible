@@ -1,0 +1,8 @@
+---
+- name: Playbook - Check and Install replication feature on Windows SQL Server
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Include role - Check and Install replication feature
+      ansible.builtin.include_role:
+        name: ./SQL_Server/ansible_role_check_and_install_replication_feature
