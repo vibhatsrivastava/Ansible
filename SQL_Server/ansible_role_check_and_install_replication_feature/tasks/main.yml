@@ -2,7 +2,7 @@
 - name: Check and Install Replication feature
   ansible.windows.win_shell: |
     # Define the SQL Server instance
-    $serverInstance = "{{ ServerInstance }}"  # Change to your server name if needed
+    $serverInstance = "{{ SQL_Server_Instance }}"  # Change to your server name if needed
     $logFile = 
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
@@ -23,12 +23,12 @@
 
     # Run the query using Invoke-SqlCmd
     try {
-        $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance '{{ ServerInstance }}' -Query $query -ErrorAction Stop
+        $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance '{{ SQL_Server_Instance }}' -Query $query -ErrorAction Stop
 
         if ($result -and $result.Installed -eq 1) {
-            Write-Host "Replication Services are installed on '{{ ServerInstance }}'."
+            Write-Host "Replication Services are installed on '{{ SQL_Server_Instance }}'."
         } else {
-            Write-Host "Replication Services are NOT installed on '{{ ServerInstance }}'."
+            Write-Host "Replication Services are NOT installed on '{{ SQL_Server_Instance }}'."
         }
     }
     catch {
@@ -46,8 +46,8 @@
 
     try
     {
-      Invoke-SqlCmd -TrustServerCertificate -ServerInstance $serverInstance -Query $enableQuery -ErrorAction Stop
-      Log-Message "Replication Services have been enabled on $serverInstance."
+      Invoke-SqlCmd -TrustServerCertificate -ServerInstance '{{ SQL_Server_Instance }}' -Query $enableQuery -ErrorAction Stop
+      Log-Message "Replication Services have been enabled on '{{ SQL_Server_Instance }}'"
     }
     catch
     {
