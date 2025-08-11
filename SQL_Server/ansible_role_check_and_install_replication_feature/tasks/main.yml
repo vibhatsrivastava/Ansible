@@ -2,14 +2,14 @@
 - name: Check and Install Replication feature
   ansible.windows.win_shell: |
     # Define the SQL Server instance
-    $serverInstance = "{{ SQL_Server_Instance }}"  # Change to your server name if needed
-    $logFile = 
+    $serverInstance = '{{ SQL_Server_Instance }}'  # Change to your server name if needed
+    $logFile = '{{ logfile }}'
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
     # Function to log messages
     function Log-Message {
         param([string]$message)
-        Add-Content -Path $logFile -Value "$timestamp - $message"
+        Add-Content -Path  -Value "$timestamp - $message"
         Write-Host $message
     }
 
@@ -23,16 +23,16 @@
 
     # Run the query using Invoke-SqlCmd
     try {
-        $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance '{{ SQL_Server_Instance }}' -Query $query -ErrorAction Stop
+        $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance $serverInstance -Query $query -ErrorAction Stop
 
         if ($result -and $result.Installed -eq 1) {
-            Write-Host "Replication Services are installed on '{{ SQL_Server_Instance }}'."
+            Log-Message "Replication Services are installed on $serverInstance."
         } else {
-            Write-Host "Replication Services are NOT installed on '{{ SQL_Server_Instance }}'."
+            Log-Message "Replication Services are NOT installed on $serverInstance."
         }
     }
     catch {
-        Write-Host "Could not determine replication status. Error: $($_.Exception.Message)"
+        Log-Message "Could not determine replication status. Error: $($_.Exception.Message)"
     }
 
     # Enable SQL Server Replication feature - assuming replication can be enabled via sp_configure
@@ -46,8 +46,8 @@
 
     try
     {
-      Invoke-SqlCmd -TrustServerCertificate -ServerInstance '{{ SQL_Server_Instance }}' -Query $enableQuery -ErrorAction Stop
-      Log-Message "Replication Services have been enabled on '{{ SQL_Server_Instance }}'"
+      Invoke-SqlCmd -TrustServerCertificate -ServerInstance $serverInstance -Query $enableQuery -ErrorAction Stop
+      Log-Message "Replication Services have been enabled on $serverInstance"
     }
     catch
     {
