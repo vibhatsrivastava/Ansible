@@ -52,5 +52,27 @@
     catch
     {
       Log-Message "Failed to enable replication. Error: $($_.Exception.Message)"
+      $setupPath = '{{ SQL_Server_Setup_Exe }}'
+      Start-Process -FilePath $setupPath -ArgumentList `
+          "/QUIET",
+          "/ACTION=Install",
+          "/FEATURES=Replication",
+          "/INSTANCENAME=$serverInstance",
+          "/SQLSYSADMINACCOUNTS=BUILTIN\Administrators",
+          "/IACCEPTSQLSERVERLICENSETERMS" `
+          -Wait -NoNewWindow
     }
 
+    # Run the query using Invoke-SqlCmd
+    try {
+    $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance $serverInstance -Query $query -ErrorAction Stop
+
+    if ($result -and $result.Installed -eq 1) {
+        Log-Message "Replication Services are installed on $serverInstance."
+    } else {
+        Log-Message "Replication Services are NOT installed on $serverInstance."
+      }
+    }
+    catch {
+        Log-Message "Could not determine replication status. Error: $($_.Exception.Message)"
+    }
