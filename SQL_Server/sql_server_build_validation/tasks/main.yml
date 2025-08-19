@@ -3,18 +3,19 @@
 # Get SQL Server Build Validation
 - name: SQL Server Build Validation
   ansible.windows.win_shell: |
-    #$logFile = "{{ logfile }}"
+    $SQL_Server_Build_Validation_Report = [System.Collections.ArrayList]@()
+    $logFile = '{{ logfile }}'
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
     # Function to log messages
     function Log-Message {
         param([string]$message)
-        Add-Content -Path "{{ logfile }}" -Value "$timestamp - $message"
+        Add-Content -Path $logFile -Value "$timestamp - $message"
         Write-Host $message
     }
 
     # Create Log File
-    if(not(Test-path "{{ logfile }}"))
+    if(not(Test-path $logFile))
     {
       New-Item $logFile -ItemType File -Force
     }
