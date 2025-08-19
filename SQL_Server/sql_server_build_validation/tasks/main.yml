@@ -25,7 +25,7 @@
     try
     {
       $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
-      Log-Message $($SQL_Server_Name)
+      Log-Message $($SQL_Server_Name | out-string)
     }
     catch
     {
