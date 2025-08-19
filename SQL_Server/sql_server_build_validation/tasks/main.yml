@@ -25,7 +25,7 @@
     try
     {
       $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
-      Log-Message "`r`n SQL Server Name Info:`r`n$($SQL_Server_Name | out-string)"
+      Log-Message "`n SQL Server Name Info:`r$($SQL_Server_Name | out-string)"
     }
     catch
     {
@@ -36,6 +36,7 @@
     try
     {
       $SQL_Get_Auth_Scheme = Invoke-Sqlcmd -TrustServerCertificate -Query "select auth_scheme from sys.dm_exec_connections where session_id = @@spid";
+      Log-Message "`n SQL Server Auth Scheme Info:`r$($SQL_Get_Auth_Scheme | out-string)"
     }
     catch
     {
@@ -50,7 +51,29 @@
     {
       $wmiQuery = "SELECT Name, Label, Blocksize FROM Win32_Volume WHERE FileSystem='NTFS'"
       $Allocation_Unit_Size = Get-WmiObject -Query $wmiQuery -ComputerName '.' | Sort-Object Name | Select-Object Name, Label, Blocksize
-      Log-Message "`r`n Allocation Unit Size Info:`r`n$($Allocation_Unit_Size | out-string)"
+      Log-Message "`nAllocation Unit Size Info:`r$($Allocation_Unit_Size | out-string)"
+    }
+    catch
+    {
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-5: Drive Free Space
+    try
+    {
+      $Drive_Free_Space_Info = Get-WmiObject Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
+      $totalGB = [math]::Round($_.Size / 1GB, 2)
+      $freeGB = [math]::Round($_.FreeSpace / 1GB, 2)
+      $percentFree = [math]::Round(($_.FreeSpace / $_.Size) * 100, 2)
+
+      [PSCustomObject]@{
+          DriveLetter    = $_.DeviceID
+          TotalSpace_GB  = $totalGB
+          FreeSpace_GB   = $freeGB
+          PercentFree    = "$percentFree%"
+        }
+      }
+      Log-Message "`nDrive Free Space Info:`r$($Drive_Free_Space_Info | out-string)"
     }
     catch
     {
