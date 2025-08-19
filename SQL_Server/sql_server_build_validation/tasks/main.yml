@@ -22,10 +22,10 @@
 
     # Step-1: Get SQL Server Name
     $Query = @"
-    select @@servername as 'servername\instancename',
-      serverproperty('servername') as 'servername',
-      serverproperty('machinename') as 'windows_name',
-      serverproperty('computernamephysicalnetbios') as 'netbios_name',
+    select @@servername as 'servername\instancename',`
+      serverproperty('servername') as 'servername',`
+      serverproperty('machinename') as 'windows_name',`
+      serverproperty('computernamephysicalnetbios') as 'netbios_name',`
       name from sys.servers where server_id = 0"
     "@
     try
