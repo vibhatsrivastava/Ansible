@@ -152,13 +152,13 @@
       $autoManaged = $os.AutomaticManagedPagefile
 
       if ($autoManaged) {
-          Write-Output "Paging file is automatically managed by Windows for all drives."
+          Log-Message "Paging file is automatically managed by Windows for all drives."
           Log-Message "Start - Disabling auto manage page file setting"
           $os.AutomaticManagedPagefile = $false
           $os.Put()
           Log-Message "Finish - Disabled auto manage page file setting"
       } else {
-          Write-Output "Paging file is manually configured."
+          Log-Message "Paging file is manually configured."
       }
     }
     catch{
