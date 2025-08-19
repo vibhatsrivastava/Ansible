@@ -1,0 +1,150 @@
+---
+
+# Get SQL Server Build Validation
+- name: SQL Server Build Validation
+  ansible.windows.win_shell: |
+    $SQL_Server_Build_Validation_Report = [System.Collections.ArrayList]@()
+    $logFile = '{{ logfile }}'
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    
+    # Function to log messages
+    function Log-Message {
+        param([string]$message)
+        Add-Content -Path $logFile -Value "$timestamp - $message"
+        Write-Host $message
+    }
+
+    # Create Log File
+    if(not(Test-path $logFile))
+    {
+      New-Item $logFile -ItemType File -Force
+    }
+
+    # Step-1: Get SQL Server Name
+    $Query = @"
+    select  
+    @@servername as 'servername\instancename',
+    serverproperty('servername') as 'servername',
+    serverproperty('machinename') as 'windows_name',
+    serverproperty('computernamephysicalnetbios') as 'netbios_name',
+    name from sys.servers where server_id = 0"
+    "@
+    try
+    {
+      $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
+      Log-Message $SQL_Server_Name
+    }
+    catch
+    {
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-2: Get Auth Scheme - Service Principal Name
+
+
+    # Step-3: Get EBS Voulmes (All GPT except primary disk 'c')
+
+
+    # Step-4
+
+
+
+# - name: Get SQL server configuration Info
+#   ansible.windows.win_shell: |
+#     $SQL_Server_Config_Validation_Report = [System.Collections.ArrayList]@()
+    
+#     # Step-1
+#     $SQL_Instance_Info = Get-SqlInstance -ServerInstance "{{ SQL_Server_Name }}"
+    
+#     # Step-2
+#     $Replication_Info = [System.Collections.ArrayList]@()
+#     $All_SQL_Database = Get-SqlDatabase -ServerInstance "{{ SQL_Server_Instance }}"
+#     foreach($db in $All_SQL_Database.Name)
+#     { 
+#       $db_replication_info = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsReplicationInstalled') AS ReplicationInstalled;" -ServerInstance "{{ SQL_Server_Instance }}" -Database $db
+#       $Replication_Info += "$db Replication Info : `r`n$($db_replication_info.ReplicationInstalled | out-string)"
+#     }
+    
+#     # Step-3
+#     $sql_max_text_repl_size_info = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ SQL_Server_Instance }}"
+
+#     # Step-4
+#     $IsFullTextInstalled = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsFullTextInstalled') AS FullTextSearchInstalled;" -ServerInstance "{{ SQL_Server_Instance }}"
+#     if($IsFullTextInstalled.FullTextSearchInstalled -eq 0 ) { $IsFullTextInstalled_Info = "IsFullTextInstalled: $False" } else { $IsFullTextInstalled_Info = "IsFullTextInstalled: $True" }
+
+#     # Step-5
+#     $Filestream_status = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT value_in_use FROM sys.configurations WHERE name = 'filestream access level';" -ServerInstance "{{ SQL_Server_Instance }}"
+#     if($Filestream_status.value_in_use -eq 0) { $Filestream_Info = "Filestream_Info: Disabled" }
+#     elseif($Filestream_status.value_in_use -eq 1) { $Filestream_Info = "Filestream_Info: T-SQL access only" }
+#     elseif($Filestream_status.value_in_use -eq 2) { $Filestream_Info =  "Filestream_Info: T-SQL and Win32 streaming access" }
+#     else { $Filestream_Info =  "Filestream_Info: Incorrect / Garbage value obtained" }
+
+#     # Step-6
+#     $SQLServer_Service_StartType = (get-service MSSQLSERVER).StartType
+#     $SQLServer_Service_StartType_Info = "SQL Server Service Startup Type: $SQLServer_Service_StartType"
+
+#     # Step-7
+#     $TraceFlag_Query = Invoke-Sqlcmd -TrustServerCertificate -Query "DBCC TRACESTATUS(3226);" -ServerInstance "{{ SQL_Server_Instance }}"
+#     if($TraceFlag_Query.TraceFlag -eq 3226)
+#     {
+#       $TraceFlag_Info = "Trace flag value is currently set to 3226"
+#     }
+#     else
+#     {
+#       $TraceFlag_Info = "Trace flag value is currently set to $($TraceFlag_Query.TraceFlag)"
+#     }
+
+#     # Step-8
+#     $SQL_Server_Max_Mix_Memory = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name IN ('max server memory (MB)', 'min server memory (MB)');" -ServerInstance "{{ SQL_Server_Instance }}"
+#     $SQL_Server_Authentication_Mode = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT CASE SERVERPROPERTY('IsIntegratedSecurityOnly') WHEN 1 THEN 'Windows Authentication Only' WHEN 0 THEN 'Mixed Mode (SQL Server and Windows Authentication)' ELSE 'Unknown'END AS AuthenticationMode;" -ServerInstance "{{ SQL_Server_Instance }}"
+#     $SQL_Server_MAXDOP = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'max degree of parallelism';" -ServerInstance "{{ SQL_Server_Instance }}"
+#     $SQL_Server_Cost_Threshold_for_Parallelism = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'cost threshold for parallelism';" -ServerInstance "{{ SQL_Server_Instance }}"
+#     $SQL_Server_Adhoc_Workload = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'optimize for ad hoc workloads';" -ServerInstance "{{ SQL_Server_Instance }}"
+#     $SQL_Server_Remote_Login_Timeout = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name LIKE '%timeout%';" -ServerInstance "{{ SQL_Server_Instance }}"
+#     $SQL_Server_DAC = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name, value_in_use FROM sys.configurations WHERE name = 'remote admin connections';" -ServerInstance "{{ SQL_Server_Instance }}"
+
+#     # Step-9
+
+#     # Step-10
+#     $SQL_Server_check_recovery_models = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT name AS [DatabaseName], recovery_model_desc AS [RecoveryModel]FROM sys.databases;" -ServerInstance "{{ SQL_Server_Instance }}"
+
+#     # Report Compilation
+#     $SQL_Server_Config_Validation_Report += $SQL_Instance_Info
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $Replication_Info
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $IsFullTextInstalled_Info
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $Filestream_info
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQLServer_Service_StartType_Info
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $TraceFlag_Info
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_Max_Mix_Memory
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_Authentication_Mode
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_MAXDOP
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_Cost_Threshold_for_Parallelism
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_Adhoc_Workload
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_Remote_Login_Timeout
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_DAC
+#     $SQL_Server_Config_Validation_Report += "`r`n"
+#     $SQL_Server_Config_Validation_Report += $SQL_Server_check_recovery_models
+
+#     # Display Report Data
+#     $SQL_Server_Config_Validation_Report
+
+#     # Report Directory Creation
+#     if(!(test-path "{{ report_dir}}"))
+#     {
+#       New-Item "{{ report_dir}}" -ItemType Directory -Force
+#     }
+
+#     # Report File Generation
+#     Write-Output $SQL_Server_Config_Validation_Report | Out-File "{{ report_dir}}\{{ report_filename }}" -Force
