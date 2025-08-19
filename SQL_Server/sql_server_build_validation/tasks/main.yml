@@ -180,20 +180,3 @@
     catch{
       Log-Message "Error: $($_.Exception.Message)"
     }
-
-    # Step-12: Diable Volume Shadow Copy Service (VSS)
-    try{
-      # Stop the VSS service if it's running
-      Stop-Service -Name 'VSS' -Force -ErrorAction SilentlyContinue
-
-      # Disable the VSS service to prevent it from starting automatically
-      Set-Service -Name 'VSS' -StartupType Disabled
-
-      # Verify VSS Service Status
-      $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
-      Log-Message "`nVSS Service Status Info:`r$($VSS_Service_Status | out-string)"
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
-
