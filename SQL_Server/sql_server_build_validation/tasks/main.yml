@@ -3,18 +3,18 @@
 # Get SQL Server Build Validation
 - name: SQL Server Build Validation
   ansible.windows.win_shell: |
-    $logFile = "{{ logfile }}"
+    #$logFile = "{{ logfile }}"
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
     # Function to log messages
     function Log-Message {
         param([string]$message)
-        Add-Content -Path $logFile -Value "$timestamp - $message"
+        Add-Content -Path "{{ logfile }}" -Value "$timestamp - $message"
         Write-Host $message
     }
 
     # Create Log File
-    if(not(Test-path $logFile))
+    if(not(Test-path "{{ logfile }}"))
     {
       New-Item $logFile -ItemType File -Force
     }
@@ -197,15 +197,14 @@
     #   Log-Message "Error: $($_.Exception.Message)"
     # }
 
-    # Step-13: Install Nuget provider, dba tools
-    try{
-      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-      Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
-      Register-PSRepository -Name "PSGallery" -SourceLocation "https://www.powershellgallery.com/api/v2" -InstallationPolicy Trusted
-      Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-      Install-Module -Name dbatools -Scope CurrentUser -Force
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-13: Install Nuget provider, dba tools
+    # try{
+    #   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    #   Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
+    #   Register-PSRepository -Name "PSGallery" -SourceLocation "https://www.powershellgallery.com/api/v2" -InstallationPolicy Trusted
+    #   Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+    #   Install-Module -Name dbatools -Scope CurrentUser -Force
+    # }
+    # catch{
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
