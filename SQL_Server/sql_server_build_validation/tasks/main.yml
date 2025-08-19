@@ -5,13 +5,13 @@
   ansible.windows.win_shell: |
     $logFile = '{{ logfile }}'
     # Create Log File
-    if(not(Test-path $logFile))
+    if(!(Test-path $logFile))
     {
       New-Item $logFile -ItemType File -Force
     }
 
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    
+
     # Function to log messages
     function Log-Message {
         param([string]$message)
