@@ -167,8 +167,9 @@
 
     # Step-10: Reboot Server
     $reboot_server = '{{ reboot_server }}'
-    if($reboot_server)
+    if($reboot_server -ne $false)
     {
+      Log-Message "Rebooting Server as requested"
       Restart-Computer -Force
     }
 
@@ -183,10 +184,20 @@
 
     # Step-12: Diable Volume Shadow Copy Service (VSS)
     try{
-      Stop-Service -Name 'VSS' -Force -ErrorAction SilentlyContinue
-      Set-Service -Name 'VSS' -StartupType Disabled
       $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
-      Log-Message "`nVSS Service Status Info:`r$($VSS_Service_Status | out-string)"
+      Log-Message "`nVSS Service Info:`r$($VSS_Service_Status | out-string)"
+      if($VSS_Service_Status.Status -ne 'Stopped')
+      {
+        Stop-Service -Name 'VSS' -Force -ErrorAction SilentlyContinue
+        Log-Message "VSS Service Status Info: Stopped"
+      }
+      if($VSS_Service_Status.StartType -ne 'Disabled')
+      {
+        Set-Service -Name 'VSS' -StartupType Disabled -Force -ErrorAction SilentlyContinue
+        Log-Message "VSS Service StartupType Info: Disabled"
+      }
+      $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
+      Log-Message "`nVSS Service Info:`r$($VSS_Service_Status | out-string)"
     }
     catch{
       Log-Message "Error: $($_.Exception.Message)"
