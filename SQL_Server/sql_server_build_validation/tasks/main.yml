@@ -19,183 +19,183 @@
       New-Item $logFile -ItemType File -Force
     }
 
-    # Step-1: Get SQL Server Name
-    $Query = "select @@servername as 'servername\instancename', serverproperty('servername') as 'servername', serverproperty('machinename') as 'windows_name', serverproperty('computernamephysicalnetbios') as 'netbios_name', name from sys.servers where server_id = 0"
-    try
-    {
-      $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
-      Log-Message "`nSQL Server Name Info:`r$($SQL_Server_Name | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-1: Get SQL Server Name
+    # $Query = "select @@servername as 'servername\instancename', serverproperty('servername') as 'servername', serverproperty('machinename') as 'windows_name', serverproperty('computernamephysicalnetbios') as 'netbios_name', name from sys.servers where server_id = 0"
+    # try
+    # {
+    #   $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
+    #   Log-Message "`nSQL Server Name Info:`r$($SQL_Server_Name | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-2: Get Auth Scheme - Service Principal Name
-    try
-    {
-      $SQL_Get_Auth_Scheme = Invoke-Sqlcmd -TrustServerCertificate -Query "select auth_scheme from sys.dm_exec_connections where session_id = @@spid";
-      Log-Message "`n SQL Server Auth Scheme Info:`r$($SQL_Get_Auth_Scheme | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-2: Get Auth Scheme - Service Principal Name
+    # try
+    # {
+    #   $SQL_Get_Auth_Scheme = Invoke-Sqlcmd -TrustServerCertificate -Query "select auth_scheme from sys.dm_exec_connections where session_id = @@spid";
+    #   Log-Message "`n SQL Server Auth Scheme Info:`r$($SQL_Get_Auth_Scheme | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-3: Get EBS Voulmes (All GPT except primary disk 'c')
+    # # Step-3: Get EBS Voulmes (All GPT except primary disk 'c')
 
 
-    # Step-4 Allocation Unit size shall be 64KB (except C & D which come with the AMI)
-    try
-    {
-      $wmiQuery = "SELECT Name, Label, Blocksize FROM Win32_Volume WHERE FileSystem='NTFS'"
-      $Allocation_Unit_Size = Get-WmiObject -Query $wmiQuery -ComputerName '.' | Sort-Object Name | Select-Object Name, Label, Blocksize
-      Log-Message "`nAllocation Unit Size Info:`r$($Allocation_Unit_Size | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-4 Allocation Unit size shall be 64KB (except C & D which come with the AMI)
+    # try
+    # {
+    #   $wmiQuery = "SELECT Name, Label, Blocksize FROM Win32_Volume WHERE FileSystem='NTFS'"
+    #   $Allocation_Unit_Size = Get-WmiObject -Query $wmiQuery -ComputerName '.' | Sort-Object Name | Select-Object Name, Label, Blocksize
+    #   Log-Message "`nAllocation Unit Size Info:`r$($Allocation_Unit_Size | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-5: Drive Free Space
-    try
-    {
-      $Drive_Free_Space_Info = Get-WmiObject Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
-      $totalGB = [math]::Round($_.Size / 1GB, 2)
-      $freeGB = [math]::Round($_.FreeSpace / 1GB, 2)
-      $percentFree = [math]::Round(($_.FreeSpace / $_.Size) * 100, 2)
+    # # Step-5: Drive Free Space
+    # try
+    # {
+    #   $Drive_Free_Space_Info = Get-WmiObject Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
+    #   $totalGB = [math]::Round($_.Size / 1GB, 2)
+    #   $freeGB = [math]::Round($_.FreeSpace / 1GB, 2)
+    #   $percentFree = [math]::Round(($_.FreeSpace / $_.Size) * 100, 2)
 
-      [PSCustomObject]@{
-          DriveLetter    = $_.DeviceID
-          TotalSpace_GB  = $totalGB
-          FreeSpace_GB   = $freeGB
-          PercentFree    = "$percentFree%"
-        }
-      }
-      Log-Message "`nDrive Free Space Info:`r$($Drive_Free_Space_Info | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    #   [PSCustomObject]@{
+    #       DriveLetter    = $_.DeviceID
+    #       TotalSpace_GB  = $totalGB
+    #       FreeSpace_GB   = $freeGB
+    #       PercentFree    = "$percentFree%"
+    #     }
+    #   }
+    #   Log-Message "`nDrive Free Space Info:`r$($Drive_Free_Space_Info | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-6: Volume Maintainence Permission
-    try
-    {
-      $Query = "SELECT  servicename, service_account, instant_file_initialization_enabled FROM sys.dm_server_services WITH (NOLOCK) WHERE servicename LIKE 'SQL Server (%'"
-      $Volume_Maintainence_Permission = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
-      Log-Message "`nVolume Maintainence Permission Info:`r$($Volume_Maintainence_Permission | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-6: Volume Maintainence Permission
+    # try
+    # {
+    #   $Query = "SELECT  servicename, service_account, instant_file_initialization_enabled FROM sys.dm_server_services WITH (NOLOCK) WHERE servicename LIKE 'SQL Server (%'"
+    #   $Volume_Maintainence_Permission = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
+    #   Log-Message "`nVolume Maintainence Permission Info:`r$($Volume_Maintainence_Permission | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-7: SQL Registry Access Permission
-    try{
-      $RegistryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\MSSQLSERVER"
-      If (-NOT (Test-Path $RegistryPath)) {
-          Log-Message "SQL Registry Access Permission: Registry Path does not exist"
-          return
-      }  
-      $Value_BeforeUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
-      Log-Message ("Value_BeforeUpdate: " + $Value_BeforeUpdate.DependOnService)
-      $DosName = 'DependOnService'
-      $DosValue = 'KEYISO','W32Time','Netlogon'
-      $DosPropertyType = 'MultiString'
-      New-ItemProperty -Path $RegistryPath -Name $DosName -Value $DosValue -PropertyType $DosPropertyType -Force
-      $Value_AfterUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
-      Log-Message ("Value_AfterUpdate: " + $Value_AfterUpdate.DependOnService) 
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-7: SQL Registry Access Permission
+    # try{
+    #   $RegistryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\MSSQLSERVER"
+    #   If (-NOT (Test-Path $RegistryPath)) {
+    #       Log-Message "SQL Registry Access Permission: Registry Path does not exist"
+    #       return
+    #   }  
+    #   $Value_BeforeUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
+    #   Log-Message ("Value_BeforeUpdate: " + $Value_BeforeUpdate.DependOnService)
+    #   $DosName = 'DependOnService'
+    #   $DosValue = 'KEYISO','W32Time','Netlogon'
+    #   $DosPropertyType = 'MultiString'
+    #   New-ItemProperty -Path $RegistryPath -Name $DosName -Value $DosValue -PropertyType $DosPropertyType -Force
+    #   $Value_AfterUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
+    #   Log-Message ("Value_AfterUpdate: " + $Value_AfterUpdate.DependOnService) 
+    # }
+    # catch{
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-8: Page File Size
-    try{
-    # Get total physical memory in MB
-      $ramMB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB)
+    # # Step-8: Page File Size
+    # try{
+    # # Get total physical memory in MB
+    #   $ramMB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB)
 
-    # Get system drive (usually C:)
-      $systemDrive = (Get-WmiObject Win32_OperatingSystem).SystemDrive
+    # # Get system drive (usually C:)
+    #   $systemDrive = (Get-WmiObject Win32_OperatingSystem).SystemDrive
 
-    # Get drive size in MB
-      $drive = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$systemDrive'"
-      $driveSizeMB = [math]::Round($drive.Size / 1MB)
+    # # Get drive size in MB
+    #   $drive = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$systemDrive'"
+    #   $driveSizeMB = [math]::Round($drive.Size / 1MB)
 
-    # Calculate recommended page file size
-    # Example logic: Initial size = RAM, Max size = 1.5x RAM, but capped to 50% of drive space
-      $initialSizeMB = $ramMB
-      $maxSizeMB = [math]::Min([math]::Round($ramMB * 1.5), [math]::Round($driveSizeMB * 0.5))
+    # # Calculate recommended page file size
+    # # Example logic: Initial size = RAM, Max size = 1.5x RAM, but capped to 50% of drive space
+    #   $initialSizeMB = $ramMB
+    #   $maxSizeMB = [math]::Min([math]::Round($ramMB * 1.5), [math]::Round($driveSizeMB * 0.5))
 
-    # Remove existing page file settings
-      Get-WmiObject -Query "SELECT * FROM Win32_PageFileSetting WHERE Name='$systemDrive\\pagefile.sys'" | Remove-WmiObject
+    # # Remove existing page file settings
+    #   Get-WmiObject -Query "SELECT * FROM Win32_PageFileSetting WHERE Name='$systemDrive\\pagefile.sys'" | Remove-WmiObject
 
-    # Apply new page file settings
-      $pf = ([WMIClass]"Win32_PageFileSetting").CreateInstance()
-      $pf.Name = "$systemDrive\\pagefile.sys"
-      $pf.InitialSize = $initialSizeMB
-      $pf.MaximumSize = $maxSizeMB
-      $pf.Put()
+    # # Apply new page file settings
+    #   $pf = ([WMIClass]"Win32_PageFileSetting").CreateInstance()
+    #   $pf.Name = "$systemDrive\\pagefile.sys"
+    #   $pf.InitialSize = $initialSizeMB
+    #   $pf.MaximumSize = $maxSizeMB
+    #   $pf.Put()
 
-      Log-Message "Page file updated on $systemDrive:"
-      Log-Message "Initial Size: $initialSizeMB MB"
-      Log-Message "Maximum Size: $maxSizeMB MB"
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    #   Log-Message "Page file updated on $systemDrive:"
+    #   Log-Message "Initial Size: $initialSizeMB MB"
+    #   Log-Message "Maximum Size: $maxSizeMB MB"
+    # }
+    # catch{
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-9: Check & Disable Automatically Manage Paging File Size
-    try{
-      $os = Get-WmiObject -Class Win32_ComputerSystem
-      $autoManaged = $os.AutomaticManagedPagefile
+    # # Step-9: Check & Disable Automatically Manage Paging File Size
+    # try{
+    #   $os = Get-WmiObject -Class Win32_ComputerSystem
+    #   $autoManaged = $os.AutomaticManagedPagefile
 
-      if ($autoManaged) {
-          Log-Message "Paging file is automatically managed by Windows for all drives."
-          Log-Message "Start - Disabling auto manage page file setting"
-          $os.AutomaticManagedPagefile = $false
-          $os.Put()
-          Log-Message "Finish - Disabled auto manage page file setting"
-      } else {
-          Log-Message "Paging file is manually configured."
-      }
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    #   if ($autoManaged) {
+    #       Log-Message "Paging file is automatically managed by Windows for all drives."
+    #       Log-Message "Start - Disabling auto manage page file setting"
+    #       $os.AutomaticManagedPagefile = $false
+    #       $os.Put()
+    #       Log-Message "Finish - Disabled auto manage page file setting"
+    #   } else {
+    #       Log-Message "Paging file is manually configured."
+    #   }
+    # }
+    # catch{
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-10: Reboot Server
-    $reboot_server = '{{ reboot_server }}'
-    if($reboot_server)
-    {
-      Restart-Computer -Force
-    }
+    # # Step-10: Reboot Server
+    # $reboot_server = '{{ reboot_server }}'
+    # if($reboot_server)
+    # {
+    #   Restart-Computer -Force
+    # }
 
-    # Step-11: SQL Patched to Latest Version
-    try{
-      $SQL_Server_Patch_Info = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL15.MSSQLSERVER\Setup" | Select-Object -Property PatchLevel, Version
-      Log-Message "`nSQL Patch Version Info:`r$($SQL_Server_Patch_Info | out-string)"
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-11: SQL Patched to Latest Version
+    # try{
+    #   $SQL_Server_Patch_Info = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL15.MSSQLSERVER\Setup" | Select-Object -Property PatchLevel, Version
+    #   Log-Message "`nSQL Patch Version Info:`r$($SQL_Server_Patch_Info | out-string)"
+    # }
+    # catch{
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-12: Diable Volume Shadow Copy Service (VSS)
-    try{
-    # Stop the VSS service if it's running
-      Stop-Service -Name 'VSS' -Force -ErrorAction SilentlyContinue
+    # # Step-12: Diable Volume Shadow Copy Service (VSS)
+    # try{
+    # # Stop the VSS service if it's running
+    #   Stop-Service -Name 'VSS' -Force -ErrorAction SilentlyContinue
 
-    # Disable the VSS service to prevent it from starting automatically
-      Set-Service -Name 'VSS' -StartupType Disabled
+    # # Disable the VSS service to prevent it from starting automatically
+    #   Set-Service -Name 'VSS' -StartupType Disabled
 
-    # Verify VSS Service Status
-      $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
-      Log-Message "`nVSS Service Status Info:`r$($VSS_Service_Status | out-string)"
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Verify VSS Service Status
+    #   $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
+    #   Log-Message "`nVSS Service Status Info:`r$($VSS_Service_Status | out-string)"
+    # }
+    # catch{
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
     # Step-13: Install Nuget provider, dba tools
     try{
