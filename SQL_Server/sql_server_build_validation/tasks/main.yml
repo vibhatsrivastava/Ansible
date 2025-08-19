@@ -20,64 +20,64 @@
     }
 
     # Step-1: Get SQL Server Name
-    $Query = "Select @@servername as 'servername\instancename', serverproperty('servername') as 'servername', serverproperty('machinename') as 'windows_name', serverproperty('computernamephysicalnetbios') as 'netbios_name', name from sys.servers where server_id = 0";
+    $Query = "Select @@servername as 'servername\instancename', serverproperty('servername') as 'servername', serverproperty('machinename') as 'windows_name', serverproperty('computernamephysicalnetbios') as 'netbios_name', name from sys.servers where server_id = 0"
     try
     {
       $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
-      Log-Message "`n SQL Server Name Info:`r$($SQL_Server_Name | out-string)"
+      Log-Message "`nSQL Server Name Info:`r$($SQL_Server_Name | out-string)"
     }
     catch
     {
       Log-Message "Error: $($_.Exception.Message)"
     }
 
-    # Step-2: Get Auth Scheme - Service Principal Name
-    try
-    {
-      $SQL_Get_Auth_Scheme = Invoke-Sqlcmd -TrustServerCertificate -Query "select auth_scheme from sys.dm_exec_connections where session_id = @@spid";
-      Log-Message "`n SQL Server Auth Scheme Info:`r$($SQL_Get_Auth_Scheme | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-2: Get Auth Scheme - Service Principal Name
+    # try
+    # {
+    #   $SQL_Get_Auth_Scheme = Invoke-Sqlcmd -TrustServerCertificate -Query "select auth_scheme from sys.dm_exec_connections where session_id = @@spid";
+    #   Log-Message "`n SQL Server Auth Scheme Info:`r$($SQL_Get_Auth_Scheme | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-3: Get EBS Voulmes (All GPT except primary disk 'c')
+    # # Step-3: Get EBS Voulmes (All GPT except primary disk 'c')
 
 
-    # Step-4 Allocation Unit size shall be 64KB (except C & D which come with the AMI)
-    try
-    {
-      $wmiQuery = "SELECT Name, Label, Blocksize FROM Win32_Volume WHERE FileSystem='NTFS'"
-      $Allocation_Unit_Size = Get-WmiObject -Query $wmiQuery -ComputerName '.' | Sort-Object Name | Select-Object Name, Label, Blocksize
-      Log-Message "`nAllocation Unit Size Info:`r$($Allocation_Unit_Size | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-4 Allocation Unit size shall be 64KB (except C & D which come with the AMI)
+    # try
+    # {
+    #   $wmiQuery = "SELECT Name, Label, Blocksize FROM Win32_Volume WHERE FileSystem='NTFS'"
+    #   $Allocation_Unit_Size = Get-WmiObject -Query $wmiQuery -ComputerName '.' | Sort-Object Name | Select-Object Name, Label, Blocksize
+    #   Log-Message "`nAllocation Unit Size Info:`r$($Allocation_Unit_Size | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
-    # Step-5: Drive Free Space
-    try
-    {
-      $Drive_Free_Space_Info = Get-WmiObject Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
-      $totalGB = [math]::Round($_.Size / 1GB, 2)
-      $freeGB = [math]::Round($_.FreeSpace / 1GB, 2)
-      $percentFree = [math]::Round(($_.FreeSpace / $_.Size) * 100, 2)
+    # # Step-5: Drive Free Space
+    # try
+    # {
+    #   $Drive_Free_Space_Info = Get-WmiObject Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
+    #   $totalGB = [math]::Round($_.Size / 1GB, 2)
+    #   $freeGB = [math]::Round($_.FreeSpace / 1GB, 2)
+    #   $percentFree = [math]::Round(($_.FreeSpace / $_.Size) * 100, 2)
 
-      [PSCustomObject]@{
-          DriveLetter    = $_.DeviceID
-          TotalSpace_GB  = $totalGB
-          FreeSpace_GB   = $freeGB
-          PercentFree    = "$percentFree%"
-        }
-      }
-      Log-Message "`nDrive Free Space Info:`r$($Drive_Free_Space_Info | out-string)"
-    }
-    catch
-    {
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    #   [PSCustomObject]@{
+    #       DriveLetter    = $_.DeviceID
+    #       TotalSpace_GB  = $totalGB
+    #       FreeSpace_GB   = $freeGB
+    #       PercentFree    = "$percentFree%"
+    #     }
+    #   }
+    #   Log-Message "`nDrive Free Space Info:`r$($Drive_Free_Space_Info | out-string)"
+    # }
+    # catch
+    # {
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
     # # Step-6: Volume Maintainence Permission
     # try
