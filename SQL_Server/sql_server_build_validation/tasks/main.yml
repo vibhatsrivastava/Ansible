@@ -3,4 +3,9 @@
 # Get SQL Server Build Validation
 - name: SQL Server Build Validation
   ansible.windows.win_shell: |
-    
+    # Function to log messages
+    function Log-Message {
+        param([string]$message)
+        Add-Content -Path $logFile -Value "$timestamp - $message"
+        Write-Host $message
+    }
