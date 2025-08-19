@@ -196,8 +196,11 @@
         Set-Service -Name 'VSS' -StartupType Disabled -Force -ErrorAction SilentlyContinue
         Log-Message "VSS Service StartupType Info: Disabled"
       }
-      $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
-      Log-Message "`nVSS Service Info:`r$($VSS_Service_Status | out-string)"
+      if($VSS_Service_Status.Status -ne 'Stopped' -or $VSS_Service_Status.StartType -ne 'Disabled')
+      {
+        $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
+        Log-Message "`nVSS Service Info:`r$($VSS_Service_Status | out-string)"
+      }
     }
     catch{
       Log-Message "Error: $($_.Exception.Message)"
