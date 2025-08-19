@@ -3,7 +3,6 @@
 # Get SQL Server Build Validation
 - name: SQL Server Build Validation
   ansible.windows.win_shell: |
-    $SQL_Server_Build_Validation_Report = [System.Collections.ArrayList]@()
     $logFile = '{{ logfile }}'
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
