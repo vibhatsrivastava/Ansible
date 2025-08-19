@@ -3,7 +3,7 @@
 # Get SQL Server Build Validation
 - name: SQL Server Build Validation
   ansible.windows.win_shell: |
-    $logFile = '{{ logfile }}'
+    $logFile = "{{ logfile }}"
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
     # Function to log messages
@@ -19,17 +19,17 @@
       New-Item $logFile -ItemType File -Force
     }
 
-    # # Step-1: Get SQL Server Name
-    # $Query = "select @@servername as 'servername\instancename', serverproperty('servername') as 'servername', serverproperty('machinename') as 'windows_name', serverproperty('computernamephysicalnetbios') as 'netbios_name', name from sys.servers where server_id = 0"
-    # try
-    # {
-    #   $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
-    #   Log-Message "`nSQL Server Name Info:`r$($SQL_Server_Name | out-string)"
-    # }
-    # catch
-    # {
-    #   Log-Message "Error: $($_.Exception.Message)"
-    # }
+    # Step-1: Get SQL Server Name
+    $Query = "select @@servername as 'servername\instancename', serverproperty('servername') as 'servername', serverproperty('machinename') as 'windows_name', serverproperty('computernamephysicalnetbios') as 'netbios_name', name from sys.servers where server_id = 0"
+    try
+    {
+      $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
+      Log-Message "`nSQL Server Name Info:`r$($SQL_Server_Name | out-string)"
+    }
+    catch
+    {
+      Log-Message "Error: $($_.Exception.Message)"
+    }
 
     # Step-2: Get Auth Scheme - Service Principal Name
     try
@@ -82,7 +82,7 @@
     # Step-6: Volume Maintainence Permission
     try
     {
-      $Query = "SELECT  servicename, service_account, instant_file_initialization_enabled FROM sys.dm_server_services WITH (NOLOCK) WHERE   servicename LIKE 'SQL Server (%'"
+      $Query = "SELECT  servicename, service_account, instant_file_initialization_enabled FROM sys.dm_server_services WITH (NOLOCK) WHERE servicename LIKE 'SQL Server (%'"
       $Volume_Maintainence_Permission = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
       Log-Message "`nVolume Maintainence Permission Info:`r$($Volume_Maintainence_Permission | out-string)"
     }
@@ -113,25 +113,25 @@
 
     # Step-8: Page File Size
     try{
-      # Get total physical memory in MB
+    # Get total physical memory in MB
       $ramMB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB)
 
-      # Get system drive (usually C:)
+    # Get system drive (usually C:)
       $systemDrive = (Get-WmiObject Win32_OperatingSystem).SystemDrive
 
-      # Get drive size in MB
+    # Get drive size in MB
       $drive = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$systemDrive'"
       $driveSizeMB = [math]::Round($drive.Size / 1MB)
 
-      # Calculate recommended page file size
-      # Example logic: Initial size = RAM, Max size = 1.5x RAM, but capped to 50% of drive space
+    # Calculate recommended page file size
+    # Example logic: Initial size = RAM, Max size = 1.5x RAM, but capped to 50% of drive space
       $initialSizeMB = $ramMB
       $maxSizeMB = [math]::Min([math]::Round($ramMB * 1.5), [math]::Round($driveSizeMB * 0.5))
 
-      # Remove existing page file settings
+    # Remove existing page file settings
       Get-WmiObject -Query "SELECT * FROM Win32_PageFileSetting WHERE Name='$systemDrive\\pagefile.sys'" | Remove-WmiObject
 
-      # Apply new page file settings
+    # Apply new page file settings
       $pf = ([WMIClass]"Win32_PageFileSetting").CreateInstance()
       $pf.Name = "$systemDrive\\pagefile.sys"
       $pf.InitialSize = $initialSizeMB
@@ -183,13 +183,13 @@
 
     # Step-12: Diable Volume Shadow Copy Service (VSS)
     try{
-      # Stop the VSS service if it's running
+    # Stop the VSS service if it's running
       Stop-Service -Name 'VSS' -Force -ErrorAction SilentlyContinue
 
-      # Disable the VSS service to prevent it from starting automatically
+    # Disable the VSS service to prevent it from starting automatically
       Set-Service -Name 'VSS' -StartupType Disabled
 
-      # Verify VSS Service Status
+    # Verify VSS Service Status
       $VSS_Service_Status = Get-Service -Name 'VSS' | Select-Object Status, StartType
       Log-Message "`nVSS Service Status Info:`r$($VSS_Service_Status | out-string)"
     }
