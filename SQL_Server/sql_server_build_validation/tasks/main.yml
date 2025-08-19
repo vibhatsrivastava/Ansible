@@ -129,7 +129,7 @@
       $maxSizeMB = [math]::Min([math]::Round($ramMB * 1.5), [math]::Round($driveSizeMB * 0.5))
 
       # Remove existing page file settings
-      Get-WmiObject -Query "SELECT * FROM Win32_PageFileSetting WHERE Name='$systemDrive\pagefile.sys'" | Remove-WmiObject -ErrorAction SilentlyContinue
+      Get-WmiObject -Query "SELECT * FROM Win32_PageFileSetting WHERE Name='$systemDrive\\pagefile.sys'" | Remove-WmiObject -ErrorAction SilentlyContinue
 
       # Apply new page file settings
       $pf = ([WMIClass]"Win32_PageFileSetting").CreateInstance()
@@ -138,7 +138,7 @@
       $pf.MaximumSize = $maxSizeMB
       $pf.Put()
 
-      Log-Message "Page file updated on $systemDrive:"
+      Log-Message "Page file updated on $systemDrive"
       Log-Message "Initial Size: $initialSizeMB MB"
       Log-Message "Maximum Size: $maxSizeMB MB"
     }
