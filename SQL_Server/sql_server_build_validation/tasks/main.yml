@@ -207,8 +207,11 @@
     try{
       [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
       Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
+      Log-Message "Nuget Provider installed successfully"
       Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
       Install-Module -Name dbatools -Scope CurrentUser -Force
+      Log-Message "dbstools module installed successfully"
+      
     }
     catch{
       Log-Message "Error: $($_.Exception.Message)"
