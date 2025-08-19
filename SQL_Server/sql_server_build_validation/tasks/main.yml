@@ -111,4 +111,39 @@
       Log-Message "Error: $($_.Exception.Message)"
     }
 
+    # Step-8: Page File Size
+    try{
+      # Get total physical memory in MB
+      $ramMB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB)
+
+      # Get system drive (usually C:)
+      $systemDrive = (Get-WmiObject Win32_OperatingSystem).SystemDrive
+
+      # Get drive size in MB
+      $drive = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$systemDrive'"
+      $driveSizeMB = [math]::Round($drive.Size / 1MB)
+
+      # Calculate recommended page file size
+      # Example logic: Initial size = RAM, Max size = 1.5x RAM, but capped to 50% of drive space
+      $initialSizeMB = $ramMB
+      $maxSizeMB = [math]::Min([math]::Round($ramMB * 1.5), [math]::Round($driveSizeMB * 0.5))
+
+      # Remove existing page file settings
+      Get-WmiObject -Query "SELECT * FROM Win32_PageFileSetting WHERE Name='$systemDrive\\pagefile.sys'" | Remove-WmiObject
+
+      # Apply new page file settings
+      $pf = ([WMIClass]"Win32_PageFileSetting").CreateInstance()
+      $pf.Name = "$systemDrive\\pagefile.sys"
+      $pf.InitialSize = $initialSizeMB
+      $pf.MaximumSize = $maxSizeMB
+      $pf.Put()
+
+      Log-Message "Page file updated on $systemDrive:"
+      Log-Message "Initial Size: $initialSizeMB MB"
+      Log-Message "Maximum Size: $maxSizeMB MB"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
 
