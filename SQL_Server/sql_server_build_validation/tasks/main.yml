@@ -25,7 +25,7 @@
     try
     {
       $SQL_Server_Name = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
-      Log-Message $($SQL_Server_Name | out-string)
+      Log-Message "`r`n SQL Server Name Info:`r`n$($SQL_Server_Name | out-string)"
     }
     catch
     {
@@ -33,10 +33,26 @@
     }
 
     # Step-2: Get Auth Scheme - Service Principal Name
-
+    try
+    {
+      $SQL_Get_Auth_Scheme = Invoke-Sqlcmd -TrustServerCertificate -Query "select auth_scheme from sys.dm_exec_connections where session_id = @@spid";
+    }
+    catch
+    {
+      Log-Message "Error: $($_.Exception.Message)"
+    }
 
     # Step-3: Get EBS Voulmes (All GPT except primary disk 'c')
 
 
-    # Step-4
-
+    # Step-4 Allocation Unit size shall be 64KB (except C & D which come with the AMI)
+    try
+    {
+      $wmiQuery = "SELECT Name, Label, Blocksize FROM Win32_Volume WHERE FileSystem='NTFS'"
+      $Allocation_Unit_Size = Get-WmiObject -Query $wmiQuery -ComputerName '.' | Sort-Object Name | Select-Object Name, Label, Blocksize
+      Log-Message "`r`n Allocation Unit Size Info:`r`n$($Allocation_Unit_Size | out-string)"
+    }
+    catch
+    {
+      Log-Message "Error: $($_.Exception.Message)"
+    }
