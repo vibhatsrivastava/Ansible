@@ -111,7 +111,26 @@
       Log-Message "Error: $($_.Exception.Message)"
     }
 
-    # Step-8: Page File Size
+    # Step-8: Check & Disable Automatically Manage Paging File Size
+    try{
+      $os = Get-WmiObject -Class Win32_ComputerSystem
+      $autoManaged = $os.AutomaticManagedPagefile
+
+      if ($autoManaged) {
+          Log-Message "Paging file is automatically managed by Windows for all drives."
+          Log-Message "Start - Disabling auto manage page file setting"
+          $os.AutomaticManagedPagefile = $false
+          $os.Put()
+          Log-Message "Finish - Disabled auto manage page file setting"
+      } else {
+          Log-Message "Paging file is manually configured."
+      }
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-9: Page File Size
     try{
       # Get total physical memory in MB
       $ramMB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB)
@@ -146,22 +165,5 @@
       Log-Message "Error: $($_.Exception.Message)"
     }
 
-    # Step-9: Check & Disable Automatically Manage Paging File Size
-    try{
-      $os = Get-WmiObject -Class Win32_ComputerSystem
-      $autoManaged = $os.AutomaticManagedPagefile
-
-      if ($autoManaged) {
-          Log-Message "Paging file is automatically managed by Windows for all drives."
-          Log-Message "Start - Disabling auto manage page file setting"
-          $os.AutomaticManagedPagefile = $false
-          $os.Put()
-          Log-Message "Finish - Disabled auto manage page file setting"
-      } else {
-          Log-Message "Paging file is manually configured."
-      }
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    
 
