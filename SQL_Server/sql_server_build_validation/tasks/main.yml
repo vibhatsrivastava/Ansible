@@ -165,5 +165,21 @@
       Log-Message "Error: $($_.Exception.Message)"
     }
 
+    # Step-10: Reboot Server
+    $reboot_server = '{{ reboot_server }}'
+    if($reboot_server)
+    {
+      Restart-Computer -Force
+    }
+
+    # Step-11: SQL Patched to Latest Version
+    try{
+      $SQL_Server_Patch_Info = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL15.MSSQLSERVER\Setup" | Select-Object -Property PatchLevel, Version
+      Log-Message "`nSQL Patch Version Info:`r$($SQL_Server_Patch_Info | out-string)"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
     
 
