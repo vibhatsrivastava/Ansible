@@ -82,7 +82,7 @@
     # Step-6: Volume Maintainence Permission
     try
     {
-      $Query = "SELECT  servicename, service_account, instant_file_initialization_enabled FROM sys.dm_server_services WITH (NOLOCK) WHERE servicename LIKE 'SQL Server (%'"
+      $Query = "SELECT servicename, service_account, instant_file_initialization_enabled FROM sys.dm_server_services WITH (NOLOCK) WHERE servicename LIKE 'SQL Server (%'"
       $Volume_Maintainence_Permission = Invoke-Sqlcmd -TrustServerCertificate -Query $Query
       Log-Message "`nVolume Maintainence Permission Info:`r$($Volume_Maintainence_Permission | out-string)"
     }
