@@ -35,7 +35,7 @@
     try
     {
       $SQL_Get_Auth_Scheme = Invoke-Sqlcmd -TrustServerCertificate -Query "select auth_scheme from sys.dm_exec_connections where session_id = @@spid";
-      Log-Message "`n SQL Server Auth Scheme Info:`r$($SQL_Get_Auth_Scheme | out-string)"
+      Log-Message "`nSQL Server Auth Scheme Info:`r$($SQL_Get_Auth_Scheme | out-string)"
     }
     catch
     {
@@ -43,6 +43,13 @@
     }
 
     # Step-3: Get EBS Voulmes (All GPT except primary disk 'c')
+    try{
+      $disk_partition_info = get-disk | Where-Object {$_.BootFromDisk -ne $true} | Select-Object -Property Number, FriendlyName, SerialNumber, PartitionStyle
+      Log-Message "`nDisk partition Info:`r$($$disk_partition_info | out-string)"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
 
 
     # Step-4 Allocation Unit size shall be 64KB (except C & D which come with the AMI)
@@ -91,25 +98,25 @@
       Log-Message "Error: $($_.Exception.Message)"
     }
 
-    # Step-7: SQL Registry Access Permission
-    try{
-      $RegistryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\MSSQLSERVER"
-      If (-NOT (Test-Path $RegistryPath)) {
-          Log-Message "SQL Registry Access Permission: Registry Path does not exist"
-          return
-      }  
-      $Value_BeforeUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
-      Log-Message ("Value_BeforeUpdate: " + $Value_BeforeUpdate.DependOnService)
-      $DosName = 'DependOnService'
-      $DosValue = 'KEYISO','W32Time','Netlogon'
-      $DosPropertyType = 'MultiString'
-      New-ItemProperty -Path $RegistryPath -Name $DosName -Value $DosValue -PropertyType $DosPropertyType -Force
-      $Value_AfterUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
-      Log-Message ("Value_AfterUpdate: " + $Value_AfterUpdate.DependOnService) 
-    }
-    catch{
-      Log-Message "Error: $($_.Exception.Message)"
-    }
+    # # Step-7: SQL Registry Access Permission
+    # try{
+    #   $RegistryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\MSSQLSERVER"
+    #   If (-NOT (Test-Path $RegistryPath)) {
+    #       Log-Message "SQL Registry Access Permission: Registry Path does not exist"
+    #       return
+    #   }  
+    #   $Value_BeforeUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
+    #   Log-Message ("Value_BeforeUpdate: " + $Value_BeforeUpdate.DependOnService)
+    #   $DosName = 'DependOnService'
+    #   $DosValue = 'KEYISO','W32Time','Netlogon'
+    #   $DosPropertyType = 'MultiString'
+    #   New-ItemProperty -Path $RegistryPath -Name $DosName -Value $DosValue -PropertyType $DosPropertyType -Force
+    #   $Value_AfterUpdate = Get-ItemProperty -Path $RegistryPath -Name DependOnService
+    #   Log-Message ("Value_AfterUpdate: " + $Value_AfterUpdate.DependOnService) 
+    # }
+    # catch{
+    #   Log-Message "Error: $($_.Exception.Message)"
+    # }
 
     # Step-8: Check & Disable Automatically Manage Paging File Size
     try{
