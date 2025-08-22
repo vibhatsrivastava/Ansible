@@ -1,2 +1,387 @@
 ---
 # tasks file for sql_server_configuration_best_practices
+- name: SQL Server Configuration Best Practices
+  ansible.windows.win_shell: |
+    $logFile = '{{ logfile }}'
+    # Create Log File
+    if(!(Test-path $logFile))
+    {
+      New-Item $logFile -ItemType File -Force
+    }
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+    # Function to log messages
+    function Log-Message {
+        param([string]$message)
+        Add-Content -Path $logFile -Value "$timestamp - $message"
+        Write-Host $message
+    }
+    
+    # Step-1: Check Replication fetaure status and install if necessary
+    $query_get_replication_status = @"
+    EXEC master.dbo.xp_instance_regread 
+        N'HKEY_LOCAL_MACHINE', 
+        N'SOFTWARE\Microsoft\MSSQLServer\Replication', 
+        N'Installed';
+    "@
+
+    # Run the query using Invoke-SqlCmd
+    try {
+        $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Query $query_get_replication_status -ErrorAction Stop
+
+        if ($result -and $result.Installed -eq 1) {
+            Log-Message "Replication Services are installed on {{ serverInstance }}"
+        } else {
+            Log-Message "Replication Services are NOT installed on {{ serverInstance }}"
+        }
+    }
+    catch {
+        Log-Message "Could not determine replication status. Error: $($_.Exception.Message)"
+    }
+
+    # Enable SQL Server Replication feature - assuming replication can be enabled via sp_configure
+
+    $enableQuery = @"
+    EXEC sp_configure 'show advanced options', 1;
+    RECONFIGURE;
+    EXEC sp_configure 'SQL Server Replication', 1;
+    RECONFIGURE;
+    "@
+
+    try
+    {
+      Invoke-SqlCmd -TrustServerCertificate -ServerInstance $serverInstance -Query $enableQuery -ErrorAction Stop
+      Log-Message "Replication Services have been enabled on $serverInstance"
+    }
+    catch
+    {
+      Log-Message "Failed to enable replication. Error: $($_.Exception.Message)"
+    }
+    
+    # Step-2: Check Max Text replication size and change as desired
+    try{
+      $get_max_text_replication_size = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ serverInstance }}"
+      Log-Message "Max text replication size is currently set to: $($get_max_text_replaication_size | out-string)"
+
+      $query_set_max_text_replication_size = @"
+      EXEC sp_configure 'show advanced options', 1;
+      RECONFIGURE;
+      EXEC sp_configure 'max text repl size', 2147483647;
+      RECONFIGURE;
+      "@
+
+      $set_max_text_replication_size = Invoke-Sqlcmd -TrustServerCertificate -Query $query_set_max_text_replication_size -ServerInstance "{{ serverInstance }}"
+      Log-Message "Max text replication size is updated to: 2147483647"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-3: Check full text search install status and install if necessary
+    try{
+      $get_full_text_search_install_status = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "{{ DBName }}" -Query "SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled') AS IsFullTextInstalled;"
+      if($get_full_text_search_install_status.IsFullTextInstalled -eq 0)
+      {
+        Log-Message "Full-Text Search is not installed"
+        Log-Message "Install Full-Text search"
+        
+        $setupPath = "{{ sql_server_setup_path }}"
+        $instanceName = "{{ serverInstance }}"
+
+        Start-Process -FilePath $setupPath -ArgumentList `
+            "/q", `
+            "/ACTION=Install", `
+            "/FEATURES=FullText", `
+            "/INSTANCENAME=$instanceName", `
+            "/IACCEPTSQLSERVERLICENSETERMS" `
+            -Wait -NoNewWindow
+        
+        Log-Message "Full-Text search installed successfully"
+      }
+      elseif($get_full_text_search_install_status.IsFullTextInstalled -eq 1)
+      {
+        Log-Message "Enable Full-Text Search in a {{ DBName }}"
+        Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "{{ DBName }}" -Query "CREATE FULLTEXT CATALOG MyCatalog AS DEFAULT;"
+        Log-Message "Full-Text Search enabled on database {{ DBName }}"
+      }
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+    
+    # Step-4: Check filestream enabled status and set as desired
+    try{
+      Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "master" -Query "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'filestream access level', 2; RECONFIGURE;"
+      $Get_Filestream_Status = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "master" -Query "EXEC sp_configure 'filestream access level';"
+      Log-Message "SQL Server Filestream Staus: $($Get_Filestream_Status | out-string)"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-5: Set SQL Server services to start automatically
+    try{
+      # Set SQL Server Database Engine service to start automatically
+      Set-Service -Name 'MSSQLSERVER' -StartupType Automatic
+
+      # Set SQL Server Agent service to start automatically (if installed)
+      Set-Service -Name 'SQLSERVERAGENT' -StartupType Automatic
+
+      # Set SQL Server Browser service to start automatically (optional)
+      Set-Service -Name 'SQLBrowser' -StartupType Automatic
+
+      # Get SQL Server service Info
+      $sql_server_service_info = Get-Service -Name 'MSSQLSERVER' | Select-Object Name, StartType, Status
+      Log-Message "SQL Server Service Info: $($sql_server_service_info | out-string)"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-6: Trace flag 3226
+    try{
+      $set_trace_flag = Invoke-Sqlcmd -TrustServerCertificate -Query "DBCC TRACEON(3226, -1);" -ServerInstance "{{ serverInstance }}"
+      $get_trace_flag = Invoke-Sqlcmd -TrustServerCertificate -Query "DBCC TRACESTATUS(3226);" -ServerInstance "{{ serverInstance }}"
+      Log-Message "SQL Server Trace Flag Value: $($get_trace_flag | out-string)"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-7: Configure SQL Server into mixed mode authentication
+    try{
+      # Load SQL Server Management Objects (SMO)
+      [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo") | Out-Null
+
+      # Connect to the SQL Server instance
+      $serverInstance = "{{ serverInstance }}"
+      $server = New-Object Microsoft.SqlServer.Management.Smo.Server($serverInstance)
+
+      # Set authentication mode to Mixed
+      $server.Settings.LoginMode = [Microsoft.SqlServer.Management.Smo.ServerLoginMode]::Mixed
+      $server.Alter()
+
+      # Restart SQL Server service to apply changes
+      Restart-Service -Name "MSSQLSERVER" # Default instance; use "MSSQL$InstanceName" for named instances
+
+      $sql_server_auth_mode = Invoke-Sqlcmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY('IsIntegratedSecurityOnly')" -ServerInstance "{{ serverInstance }}"
+      if($sql_server_auth_mode.Column1 -eq 0)
+      {
+        Log-Message "SQL Server Authentication Mode: Mixed Mode"
+      }
+      elseif($sql_server_auth_mode.Column1 -eq 1)
+      {
+        Log-Message "SQL Server Authentication Mode: Windows-only"
+      }
+      else
+      {
+        Log-Message "ERROR - SQL Server Authentication Mode: NA"
+      }
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-8: Check SQL Server Configuration Settings
+    try{
+      $query_check_sql_server_config_settings = @"
+      SELECT 
+          @@SERVERNAME AS ServerName,
+          name AS [Configuration Name],
+          value AS [Configured Value]
+      FROM sys.configurations
+      WHERE name IN (
+          'max server memory (MB)',
+          'min server memory (MB)',
+          'cost threshold for parallelism',
+          'max degree of parallelism',
+          'remote admin connections',
+          'optimize for ad hoc workloads',
+          'remote login timeout (s)'
+      );
+      "@
+
+      Invoke-sqlcmd -TrustServerCertificate -Query $query_check_sql_server_config_settings
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-9: Set SQL Server memory allocation - Min & Max memory
+    try{
+      $query_set_mix_max_sql_memory = @"
+      USE master;
+      GO
+
+      DECLARE @max_server_memory BIGINT,
+              @min_server_memory BIGINT;
+
+      -- Calculate memory values in MB
+      SELECT 
+          @max_server_memory = CONVERT(BIGINT, total_physical_memory_kb / 1024 * 0.88),
+          @min_server_memory = CONVERT(BIGINT, total_physical_memory_kb / 1024 * 0.10)
+      FROM sys.dm_os_sys_memory;
+
+      -- Enable advanced options
+      EXEC sp_configure 'show advanced options', 1;
+      RECONFIGURE;
+
+      -- Set max server memory
+      EXEC sp_configure 'max server memory (MB)', @max_server_memory;
+      RECONFIGURE;
+
+      -- Set min server memory
+      EXEC sp_configure 'min server memory (MB)', @min_server_memory;
+      RECONFIGURE;
+
+      -- Optionally disable advanced options again
+      EXEC sp_configure 'show advanced options', 0;
+      RECONFIGURE;
+      "@
+
+      Invoke-sqlcmd -TrustServerCertificate -Query $query_set_mix_max_sql_memory
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-10: Set max degree of parallelism (MAXDOP)
+    try{
+      $query_set_MAXDOP = @"
+      USE master;
+      GO
+
+      DECLARE @cpu INT, @maxdop INT;
+
+      -- Calculate physical CPU count
+      SELECT @cpu = CASE 
+          WHEN hyperthread_ratio = cpu_count THEN cpu_count
+          ELSE (cpu_count / hyperthread_ratio)
+      END
+      FROM sys.dm_os_sys_info;
+
+      -- Determine MAXDOP value
+      SELECT @maxdop = CASE 
+          WHEN @cpu / 2 >= 16 THEN 16
+          ELSE @cpu / 2
+      END;
+
+      -- Enable advanced options
+      EXEC sp_configure 'show advanced options', 1;
+      RECONFIGURE;
+
+      -- Set MAXDOP
+      EXEC sp_configure 'max degree of parallelism', @maxdop;
+      RECONFIGURE;
+
+      -- Optionally disable advanced options again
+      EXEC sp_configure 'show advanced options', 0;
+      RECONFIGURE;
+      "@
+
+      Invoke-sqlcmd -TrustServerCertificate -Query $query_set_MAXDOP
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-11: Set cost threshold for parallelism
+    try{
+      $set_cost_threshold_for_parallelism = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" `
+      -Database "master" `
+      -Query "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'cost threshold for parallelism', 150; RECONFIGURE;"
+
+      $query_cost_threshold_for_parallelism = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Query "EXEC sp_configure 'cost threshold for parallelism';"
+      Log-Message "The cost threshold for parallelist is set to: $($query_cost_threshold_for_parallelism.config_value)"
+    }
+
+    # Step-12: Optimize for adhoc workloads.
+    try{
+      $optimize_adhoc_workload = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "YourServerName" -Query "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'optimize for ad hoc workloads', 1; RECONFIGURE;"
+      Log-Message "Optimize for adhoc workloads: $($optimize_adhoc_workload | out-string)"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-13: Set remote login timeout to 10
+    try{
+      $set_remote_login_timeout = Invoke-Sqlcmd -Query "EXEC sp_configure 'remote login timeout', 10; RECONFIGURE;" -ServerInstance "{{ serverInstance }}" -Database "master"
+      Log-Message "Remote Login Time set to 10 seconds"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-14: Enable dedicated admin connection (DAC)
+    try{
+      $query_remote_admin_connections = "SELECT * FROM sys.configurations WHERE name = 'remote admin connections';"
+      $status_remote_admin_connections = Invoke-SQLCmd -TrustServerCertificate -Query $query_remote_admin_connections
+      if($status_remote_admin_connections.value_in_use -eq 0 -and $status_remote_admin_connections.value -eq 0)
+      {
+        Log-Message "Enabling dedicated admin connection (DAC)"
+        $query_enable_dac = "EXEC sp_configure 'remote admin connections', 1; RECONFIGURE;"
+        Invoke-SQLCmd -TrustServerCertificate -Query $query_enable_dac
+        Log-Message "Dedicated Admin Connection (DAC) enabled"
+      }
+    }
+    catch{
+        Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-15: Find job without a schedule
+    try {
+      $query_jobs_without_schedule = @"
+      use msdb;
+      SELECT j.name, s.name
+      FROM msdb.dbo.sysjobs j
+      LEFT JOIN msdb.dbo.sysjobschedules js ON js.job_id = j.job_id
+      LEFT JOIN msdb.dbo.sysschedules s ON js.schedule_id = s.schedule_id
+      "@
+
+      $jobs_without_schedule = Invoke-Sqlcmd -TrustServerCertificate -Query $query_jobs_without_schedule
+      Log-Message "jobs without a schedule: $($jobs_without_schedule | out-string)"
+    }
+    catch
+    {
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+    
+    # Step-16: OpsGenie Operator
+
+    # Step-17: Enable database availability group level (DAG)
+    try {
+      $get_HADR = Invoke-SQLCmd -TrustServerCertificate -Query "SELECT SERVERPROPERTY ('IsHadrEnabled')"
+      if($get_HADR.Column1 -eq 0)
+      {
+        Log-Message "HADR is disabled"
+        Log-Message "Enabling HADR"
+        Enable-DbaAgHadr -SqlInstance "{{ serverInstance }}" -Force
+        Log-Message "HADR is now enabled"
+      }
+      elseif ($get_HADR.Column1 -eq 1)
+      {
+        Log-Message "HADR is enabled"
+      }
+    }
+    catch {
+        Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-18: Enable tempdb has atleast 4 data files of the same size.
+    try {
+      $get_current_tempdb = @"
+      SELECT name, physical_name, size, max_size, growth
+      FROM sys.master_files
+      WHERE database_id = DB_ID('tempdb') AND type_desc = 'ROWS';
+      "@
+
+      $current_tempdb_info = Invoke-Sqlcmd -TrustServerCertificate -Query $get_current_tempdb -ServerInstance "{{ serverInstance }}"
+      log-message "Current tempdb file info: $($current_tempdb_info | out-string)"
+    }
+    catch {
+        Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-19: Enable all databases for auto growth.

@@ -1,2 +1,7 @@
 ---
 # defaults file for sql_server_configuration_best_practices
+logfile: 'C:\ansible\SQL_Server_Configuration_Best_Practices.log'
+serverInstance: '.' # SQL Server Instance Name
+AGName: '' # Availability group name
+DBName: 'master' # Database name
+sql_server_setup_path: 'C:\Path\To\SQLServer\Setup.exe'  # Update with actual path to setup.exe
