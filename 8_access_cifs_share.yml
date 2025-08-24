@@ -9,19 +9,11 @@
     drive_letter: "Z:"
   tasks:
     - name: Map network drive to CIFS share
-      win_command: >
-        net use {{ drive_letter }} "\\{{ cifs_server }}\{{ cifs_share }}"
-        /user:{{ cifs_user }} "{{ cifs_password }}"
+      win_shell: |
+        net use {{ drive_letter }} "\\{{ cifs_server }}\{{ cifs_share }}" /user:{{ cifs_user }} "{{ cifs_password }}"
+        dir {{ drive_letter }}\\
       register: map_drive_result
 
     - name: Show result of mapping
       debug:
         var: map_drive_result.stdout
-
-    - name: List contents of the mapped drive
-      win_shell: "dir {{ drive_letter }}\\"
-      register: dir_result
-
-    - name: Show directory contents
-      debug:
-        var: dir_result.stdout_lines
