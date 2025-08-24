@@ -1,0 +1,18 @@
+---
+- name: Playbook to access CIFS share path
+  hosts: all
+  vars:
+    cifs_server: SERVERHOST-01
+    cifs_share: cluster_virtual_fileshare
+    cifs_user: vsrivastava
+    cifs_password: Admin@123
+  tasks:
+    - name: Map network drive to CIFS share
+      win_command: >
+        net use Z: "\\{{ cifs_server }}\{{ cifs_share }}"
+        /user:{{ cifs_user }} "{{ cifs_password }}"
+      register: map_drive_result
+
+    - name: Show result of mapping
+      debug:
+        var: map_drive_result.stdout
