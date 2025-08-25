@@ -2,9 +2,9 @@
 - name: Playbook to access CIFS share path
   hosts: all
   vars:
-    cifs_server: SERVERHOST-01
-    cifs_share: cluster_virtual_fileshare
-    cifs_user: vsrivastava
+    cifs_server: dc
+    cifs_share: c$
+    cifs_user: testlab\Administrator
     cifs_password: Admin@123
     drive_letter: "Z:"
   tasks:
