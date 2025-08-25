@@ -384,4 +384,25 @@
         Log-Message "Error: $($_.Exception.Message)"
     }
 
-    # Step-19: Enable all databases for auto growth.
+    # Step-19: Enable all databases for auto growth
+    try{
+      # Get list of databases
+      $dbList = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Query "SELECT name FROM sys.databases WHERE state_desc = 'ONLINE'"
+
+      # Loop through each database and enable autogrowth
+      foreach ($db in $dbList) {
+      $dbName = $db.name
+      $query = @"
+      USE [$dbName];
+      ALTER DATABASE [$dbName]
+      MODIFY FILE (NAME = N'$dbName', FILEGROWTH = 10MB);
+      ALTER DATABASE [$dbName]
+      MODIFY FILE (NAME = N'$dbName_log', FILEGROWTH = 10MB);
+      "@
+      Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Query $query
+      Log-Message "Autogrowth enabled for database: $dbName"
+      }
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
