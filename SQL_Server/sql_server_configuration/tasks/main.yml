@@ -75,3 +75,35 @@
     catch{
       Log-Message "Error: $($_.Exception.Message)"
     }
+
+    # Step-3: Check full text search install status and install if necessary
+    try{
+      $get_full_text_search_install_status = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "{{ DBName }}" -Query "SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled') AS IsFullTextInstalled;"
+      if($get_full_text_search_install_status.IsFullTextInstalled -eq 0)
+      {
+        Log-Message "Full-Text Search is not installed"
+        Log-Message "Install Full-Text search"
+        
+        $setupPath = "{{ sql_server_setup_path }}"
+        $instanceName = "{{ serverInstance }}"
+
+        Start-Process -FilePath $setupPath -ArgumentList `
+            "/q", `
+            "/ACTION=Install", `
+            "/FEATURES=FullText", `
+            "/INSTANCENAME=$instanceName", `
+            "/IACCEPTSQLSERVERLICENSETERMS" `
+            -Wait -NoNewWindow
+        
+        Log-Message "Full-Text search installed successfully"
+      }
+      elseif($get_full_text_search_install_status.IsFullTextInstalled -eq 1)
+      {
+        Log-Message "Enable Full-Text Search in a {{ DBName }}"
+        Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "{{ DBName }}" -Query "CREATE FULLTEXT CATALOG MyCatalog AS DEFAULT;"
+        Log-Message "Full-Text Search enabled on database {{ DBName }}"
+      }
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
