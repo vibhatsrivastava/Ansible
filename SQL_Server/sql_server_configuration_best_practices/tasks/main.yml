@@ -3,7 +3,6 @@
 - name: SQL Server Configuration Best Practices
   ansible.windows.win_shell: |
     $logFile = '{{ logfile }}'
-    # Create Log File
     if(!(Test-path $logFile))
     {
       New-Item $logFile -ItemType File -Force
