@@ -1,6 +1,6 @@
 ---
 # defaults file for sql_server_configuration_best_practices
-logfile: 'C:\ansible\SQL_Server_Configuration_Best_Practices.log'
+logfile: 'C:\ansible\SQL_Server_Configuration.log'
 serverInstance: '.' # SQL Server Instance Name
 AGName: '' # Availability group name
 DBName: 'master' # Database name
