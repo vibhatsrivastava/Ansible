@@ -11,6 +11,6 @@
 
     - name: Include role - sql server configuration best practices
       ansible.builtin.include_role:
-        name: ./SQL_Server/sql_server_configuration_best_practices
+        name: ./SQL_Server/sql_server_configuration
       when:
         do_exec_apply | default(false) | bool
