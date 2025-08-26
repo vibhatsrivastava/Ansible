@@ -56,3 +56,22 @@
     {
       Log-Message "Failed to enable replication. Error: $($_.Exception.Message)"
     }
+
+    # Step-2: Check Max Text replication size and change as desired
+    try{
+      $get_max_text_replication_size = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ serverInstance }}"
+      Log-Message "Max text replication size is currently set to: $($get_max_text_replaication_size | out-string)"
+
+      $query_set_max_text_replication_size = @"
+      EXEC sp_configure 'show advanced options', 1;
+      RECONFIGURE;
+      EXEC sp_configure 'max text repl size', 2147483647;
+      RECONFIGURE;
+      "@
+
+      $set_max_text_replication_size = Invoke-Sqlcmd -TrustServerCertificate -Query $query_set_max_text_replication_size -ServerInstance "{{ serverInstance }}"
+      Log-Message "Max text replication size is updated to: 2147483647"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
