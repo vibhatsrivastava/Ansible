@@ -16,3 +16,43 @@
         Add-Content -Path $logFile -Value "$timestamp - $message"
         Write-Host $message
     }
+
+    # Step-1: Check Replication fetaure status and install if necessary
+    $query_get_replication_status = @"
+    EXEC master.dbo.xp_instance_regread 
+        N'HKEY_LOCAL_MACHINE', 
+        N'SOFTWARE\Microsoft\MSSQLServer\Replication', 
+        N'Installed';
+    "@
+
+    try {
+        $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Query $query_get_replication_status -ErrorAction Stop
+
+        if ($result -and $result.Installed -eq 1) {
+            Log-Message "Replication Services are installed on {{ serverInstance }}"
+        } else {
+            Log-Message "Replication Services are NOT installed on {{ serverInstance }}"
+        }
+    }
+    catch {
+        Log-Message "Could not determine replication status. Error: $($_.Exception.Message)"
+    }
+
+    # Enable SQL Server Replication feature - assuming replication can be enabled via sp_configure
+
+    $enableQuery = @"
+    EXEC sp_configure 'show advanced options', 1;
+    RECONFIGURE;
+    EXEC sp_configure 'SQL Server Replication', 1;
+    RECONFIGURE;
+    "@
+
+    try
+    {
+      Invoke-SqlCmd -TrustServerCertificate -ServerInstance $serverInstance -Query $enableQuery -ErrorAction Stop
+      Log-Message "Replication Services have been enabled on $serverInstance"
+    }
+    catch
+    {
+      Log-Message "Failed to enable replication. Error: $($_.Exception.Message)"
+    }
