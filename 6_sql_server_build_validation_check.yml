@@ -2,7 +2,18 @@
 - name: SQL Server Configuration Validation Check
   hosts: all
   gather_facts: yes
+  vars:
+    do_exec_validate: false
+    do_exec_apply: false
   tasks:
     - name: Include role - sql server configuration validation
       ansible.builtin.include_role:
         name: ./SQL_Server/sql_server_build_validation
+      when:
+        do_exec_validate | default(false) | bool
+
+    - name: Include role - sql server configuration best practices
+      ansible.builtin.include_role:
+        name: ./SQL_Server/sql_server_configuration_best_practices
+      when:
+        do_exec_apply | default(false) | bool
