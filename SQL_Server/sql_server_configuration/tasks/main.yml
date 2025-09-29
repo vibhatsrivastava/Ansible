@@ -1,0 +1,109 @@
+---
+# tasks file for sql_server_configuration_best_practices
+- name: SQL Server Configuration Best Practices
+  ansible.windows.win_shell: |
+    $logFile = '{{ logfile }}'
+    if(!(Test-path $logFile))
+    {
+      New-Item $logFile -ItemType File -Force
+    }
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+    # Function to log messages
+    function Log-Message {
+        param([string]$message)
+        Add-Content -Path $logFile -Value "$timestamp - $message"
+        Write-Host $message
+    }
+
+    # Step-1: Check Replication fetaure status and install if necessary
+    $query_get_replication_status = @"
+    EXEC master.dbo.xp_instance_regread 
+        N'HKEY_LOCAL_MACHINE', 
+        N'SOFTWARE\Microsoft\MSSQLServer\Replication', 
+        N'Installed';
+    "@
+
+    try {
+        $result = Invoke-SqlCmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Query $query_get_replication_status -ErrorAction Stop
+
+        if ($result -and $result.Installed -eq 1) {
+            Log-Message "Replication Services are installed on {{ serverInstance }}"
+        } else {
+            Log-Message "Replication Services are NOT installed on {{ serverInstance }}"
+        }
+    }
+    catch {
+        Log-Message "Could not determine replication status. Error: $($_.Exception.Message)"
+    }
+
+    # Enable SQL Server Replication feature - assuming replication can be enabled via sp_configure
+
+    $enableQuery = @"
+    EXEC sp_configure 'show advanced options', 1;
+    RECONFIGURE;
+    EXEC sp_configure 'SQL Server Replication', 1;
+    RECONFIGURE;
+    "@
+
+    try
+    {
+      Invoke-SqlCmd -TrustServerCertificate -ServerInstance $serverInstance -Query $enableQuery -ErrorAction Stop
+      Log-Message "Replication Services have been enabled on $serverInstance"
+    }
+    catch
+    {
+      Log-Message "Failed to enable replication. Error: $($_.Exception.Message)"
+    }
+
+    # Step-2: Check Max Text replication size and change as desired
+    try{
+      $get_max_text_replication_size = Invoke-Sqlcmd -TrustServerCertificate -Query "EXEC sp_configure 'max text repl size';" -ServerInstance "{{ serverInstance }}"
+      Log-Message "Max text replication size is currently set to: $($get_max_text_replaication_size | out-string)"
+
+    $query_set_max_text_replication_size = @"
+    EXEC sp_configure 'show advanced options', 1;
+    RECONFIGURE;
+    EXEC sp_configure 'max text repl size', 2147483647;
+    RECONFIGURE;
+    "@
+
+      $set_max_text_replication_size = Invoke-Sqlcmd -TrustServerCertificate -Query $query_set_max_text_replication_size -ServerInstance "{{ serverInstance }}"
+      Log-Message "Max text replication size is updated to: 2147483647"
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }
+
+    # Step-3: Check full text search install status and install if necessary
+    try{
+      $get_full_text_search_install_status = Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "{{ DBName }}" -Query "SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled') AS IsFullTextInstalled;"
+      if($get_full_text_search_install_status.IsFullTextInstalled -eq 0)
+      {
+        Log-Message "Full-Text Search is not installed"
+        Log-Message "Install Full-Text search"
+        
+        $setupPath = "{{ sql_server_setup_path }}"
+        $instanceName = "{{ serverInstance }}"
+
+        Start-Process -FilePath $setupPath -ArgumentList `
+            "/q", `
+            "/ACTION=Install", `
+            "/FEATURES=FullText", `
+            "/INSTANCENAME=$instanceName", `
+            "/IACCEPTSQLSERVERLICENSETERMS" `
+            -Wait -NoNewWindow
+        
+        Log-Message "Full-Text search installed successfully"
+      }
+      elseif($get_full_text_search_install_status.IsFullTextInstalled -eq 1)
+      {
+        Log-Message "Enable Full-Text Search in a {{ DBName }}"
+        Invoke-Sqlcmd -TrustServerCertificate -ServerInstance "{{ serverInstance }}" -Database "{{ DBName }}" -Query "CREATE FULLTEXT CATALOG MyCatalog AS DEFAULT;"
+        Log-Message "Full-Text Search enabled on database {{ DBName }}"
+      }
+    }
+    catch{
+      Log-Message "Error: $($_.Exception.Message)"
+    }

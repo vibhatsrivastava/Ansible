@@ -1,0 +1,5 @@
+---
+SQL_Server_Name: localhost
+SQL_Server_Instance: '.'
+report_dir: 'C:\ansible'
+report_filename: sql_server_config_report.txt

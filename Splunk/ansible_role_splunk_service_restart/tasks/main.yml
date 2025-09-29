@@ -1,0 +1,19 @@
+---
+- name: Get OS Info
+  ansible.builtin.setup:
+  register: os_family_info
+
+- name: Show registerted output
+  ansible.builtin.debug:
+    var: os_family_info.ansible_facts['ansible_os_family']
+
+- name: Linux (Splunk Service Restart)
+  ansible.builtin.include_tasks: linux.yml
+  when:
+    - os_family_info.ansible_facts['ansible_os_family'] != 'Windows'
+    - os_family_info.ansible_facts['ansible_os_family'] in ['Debian']
+
+- name: Windows (Splunk Service Restart)
+  ansible.builtin.include_tasks: windows.yml
+  when:
+    - os_family_info.ansible_facts['ansible_os_family'] == 'Windows'

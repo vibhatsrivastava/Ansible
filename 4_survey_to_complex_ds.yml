@@ -1,0 +1,7 @@
+---
+- name: Playbook to formulate survey inputs into complex data structure as defined
+  hosts: all
+  tasks:
+    - name: Call ansible role to transform data from surveys into complex data structure
+      ansible.builtin.include_role:
+        name: ansible_role_transform_survey_input_into_complex_data_structure

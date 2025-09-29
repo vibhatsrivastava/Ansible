@@ -1,0 +1,11 @@
+---
+- name: Playbook to list virtual machines in Hyper-V
+  hosts: all
+  tasks:
+    - name: List VM's
+      ansible.windows.win_shell: get-VM
+      register: hyperv_vm_list
+
+    - name: Show List of virtual machines hosted on Hyper-V
+      ansible.builtin.debug:
+        var: hyperv_vm_list

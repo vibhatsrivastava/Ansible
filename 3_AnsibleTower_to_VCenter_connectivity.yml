@@ -1,0 +1,15 @@
+---
+- name: Connectivity test from ansible tower to VCenter
+  hosts: all
+  connection: local
+  vars:
+    vcenter_hostname: "{{ lookup('env', 'VMWARE_HOST')}}"
+    vcenter_username: "{{ lookup('env', 'VMWARE_USER')}}"
+    vcenter_password: "{{ lookup('env', 'VMWARE_PASSWORD')}}"
+  tasks:
+    - name: Get VCenter Info
+      community.vmware.vmware_about_info:
+        hostname: '{{ vcenter_hostname }}'
+        username: '{{ vcenter_username }}'
+        password: '{{ vcenter_password }}'
+        validate_certs: false

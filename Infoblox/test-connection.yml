@@ -1,0 +1,27 @@
+---
+- name: Infoblox connection testing
+  hosts: localhost
+  connection: local
+  vars:
+      infoblox_host: "https://192.168.1.150/wapi/v2.13"
+      infoblox_user: "{{ lookup('env', 'ANSIBLE_NET_USERNAME') }}"
+      infoblox_pass: "{{ lookup('env', 'ANSIBLE_NET_PASSWORD') }}"
+  tasks:
+    - name: Check Infoblox Version
+      uri:
+        url: "{{ infoblox_host }}/member/license"
+        method: GET
+        user: "{{ infoblox_user }}"
+        password: "{{ infoblox_pass }}"
+        force_basic_auth: yes
+        validate_certs: no
+        return_content: yes
+      register: infoblox_response
+
+    # - name: Print NIOS Version
+    #   debug:
+    #     msg: |
+    #       "{{ item.host_name }}"
+    #       "{{ item.platform }}"
+    #   loop: "{{ infoblox_response.json }}"
+    

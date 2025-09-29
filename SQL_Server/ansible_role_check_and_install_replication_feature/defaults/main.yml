@@ -1,0 +1,4 @@
+---
+SQL_Server_Instance: 'localhost'
+logfile: 'C:\ansible\ReplicationAudit.log'
+SQL_Server_Setup_Exe: 'C:\Program Files\Microsoft SQL Server\150\Setup Bootstrap\SQL2019\Setup.exe'

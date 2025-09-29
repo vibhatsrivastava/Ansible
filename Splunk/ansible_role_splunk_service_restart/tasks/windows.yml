@@ -1,0 +1,33 @@
+---
+- name: Windows
+  block:
+    - name: Windows (Splunk service restart)
+      ansible.windows.win_command:
+        argv:
+          - '{{ windows_splunk_install_path }}\bin\splunk'
+          - restart
+      register: windows_splunk_service_restart_info
+
+    - name: Show Splunk service restart output
+      ansible.builtin.debug:
+        var: windows_splunk_service_restart_info
+
+    - name: Windows (Splunk service status)
+      ansible.windows.win_command:
+        argv:
+          - '{{ windows_splunk_install_path }}\bin\splunk'
+          - status
+      register: windows_splunk_service_status_info
+
+    - name: Set success facts if splunk service is running
+      ansible.builtin.set_fact:
+        fact_rc: 0
+        fact_msg: 'splunkd is running'
+      when:
+        - windows_splunk_service_status_info.stdout | ansible.builtin.regex_search('Splunkd: Running')
+  rescue:
+    - name: Set failure facts
+      ansible.builtin.set_fact:
+        fact_rc: 1
+        fact_task_name: "{{ ansible_failed_task.name }}"
+        fact_task_error: "{{ ansible_failed_result }}"

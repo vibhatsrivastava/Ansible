@@ -1,0 +1,3 @@
+---
+logfile: 'C:\ansible\SQL_Server_Build_Validation.log'
+reboot_server: false

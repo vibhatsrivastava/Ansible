@@ -1,0 +1,64 @@
+---
+- name: Playbook to check if the tower token has expired
+  hosts: localhost
+  connection: local
+  vars:
+    tower_host: "{{ lookup('env', 'TOWER_HOST') }}"
+    tower_token: "{{ lookup('env', 'TOWER_OAUTH_TOKEN') }}"
+  tasks:
+    - name: Block to check mandatory variables info
+      block:
+        - name: Assert that mandatory variables are supplied
+          ansible.builtin.assert:
+            that:
+              - tower_host is defined and tower_host | length > 0
+              - tower_token is defined and tower_token | length > 0
+
+        - name: Show message that mandatory variables are supplied
+          ansible.builtin.debug:
+            msg: "Assertion passed - mandatory variables are supplied"
+      rescue:
+        - name: Set failure fact
+          ansible.builtin.set_fact:
+            exec_success: false
+            exec_changed: false
+            exec_rc: 1
+            exec_message: "Assertion failed - mandatory variables are not supplied"
+
+        - name: End task
+          ansible.builtin.meta: end_host
+
+    - name: Block to check tower token expiry
+      block:
+        - name: Get tower token details
+          ansible.builtin.uri:
+            url: "{{ tower_host }}/api/v2/tokens"
+            return_content: true
+            headers:
+              Authorization: "Bearer {{ lookup('env', 'TOWER_OAUTH_TOKEN') }}"
+            method: GET
+            status_code: 200
+            body_format: json
+            validate_certs: false
+          no_log: true
+          register: tokens_info
+
+        - name: Confirm that the current token is working
+          ansible.builtin.debug:
+            msg: "The tower token has not expired and currently working (active)"
+          when:
+            - tokens_info.status == 200
+      rescue:
+        - name: Set failure fact
+          ansible.builtin.set_fact:
+            exec_success: false
+            exec_changed: false
+            exec_rc: 2
+            exec_message: "The tower token as expired"
+
+        - name: End task
+          ansible.builtin.meta: end_host
+
+    - name: Show token expiry details
+      ansible.builtin.debug:
+        msg: "The tower token is set to expire on {{ tokens_info.json.results[0].expires }}"

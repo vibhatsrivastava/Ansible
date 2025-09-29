@@ -1,0 +1,52 @@
+---
+- name: Playbook to check the settings required for a JT
+  hosts: localhost
+  connection: local
+  vars:
+    tower_host: '{{ lookup("env", "TOWER_HOST") }}'
+  tasks:
+    - name: Validate the Project name is supplied as input
+      ansible.builtin.assert:
+        that:
+          - project_name is defined and project_name | length > 0
+        fail_msg: "'project_name' is mandatory to be supplied"
+        success_msg: "project_name is supplied {{ project_name }}"
+
+    - name: Verify that the project name exists
+      ansible.builtin.uri:
+        url: "{{ tower_host }}/api/v2/projects/?name={{ project_name }}"
+        body_format: json
+        force_basic_auth: false
+        headers:
+          Authorization: "Bearer {{ lookup('env', 'TOWER_OAUTH_TOKEN') }}"
+        method: GET
+        status_code: 200
+        validate_certs: false
+      register: project_info
+
+    - name: Set project facts
+      ansible.builtin.set_fact:
+        project_id_fact: "{{ project_info.json.results[0].id }}"
+
+    - name: Get all job templates
+      ansible.builtin.uri:
+        url: "{{ tower_host }}/api/v2/job_templates"
+        body_format: json
+        force_basic_auth: false
+        headers:
+          Authorization: "Bearer {{ lookup('env', 'TOWER_OAUTH_TOKEN') }}"
+        method: GET
+        status_code: 200
+        validate_certs: false
+      register: all_jt_info
+
+    - name: Set JT facts
+      ansible.builtin.set_fact:
+        jt_config_array: "{{ jt_config_array | default([]) + [item.name] }}"
+      when:
+        - item.project | int == project_id_fact | int
+      loop: "{{ all_jt_info.json.results }}"
+
+    - name: Display JT fact
+      ansible.builtin.debug:
+        var: jt_config_array
