@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: Ansible-App
+  description: Ansible Repository.
+  # Example for optional annotations
+  annotations:
+    github.com/project-slug: vibhatsrivastava/Ansible
+  #   backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  owner: platform-engineering-team
+  lifecycle: experimental
