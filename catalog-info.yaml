@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: Ansible-App
+  name: ansible-app
   description: Ansible Repository
   # Example for optional annotations
   annotations:
