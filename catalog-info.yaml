@@ -6,6 +6,7 @@ metadata:
   # Example for optional annotations
   annotations:
     github.com/project-slug: vibhatsrivastava/Ansible
+    backstage.io/techdocs-ref: dir:.
 spec:
   type: service
   owner: platform-engineering-group
