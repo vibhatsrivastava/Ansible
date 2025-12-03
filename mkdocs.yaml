@@ -1,3 +1,4 @@
 site_name: Ansible Development
+repo_url: https://github.com/vibhatsrivastava/Ansible
 nav:
   - Read me: ./README.md
